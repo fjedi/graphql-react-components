@@ -7,10 +7,6 @@ module.exports = {
     'prettier',
     'prettier/@typescript-eslint',
   ],
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
-  },
   env: {
     es6: true,
     browser: true,
@@ -18,10 +14,10 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2017,
+    ecmaVersion: 2020,
     sourceType: 'module',
     jsx: true,
-    project: 'tsconfig-cjs.json',
+    project: 'tsconfig.json',
   },
   rules: {
     'no-debugger': 'off',

@@ -1,11 +1,9 @@
-import * as assert from 'assert';
-import someFn from '../src';
+// import { compareIds } from '../src';
 
+// describe('Test graphql-react-components helpers', function () {
+//   it('No error expected', async function () {
+//     const result = compareIds('1', '2');
 
-describe('Test someFn', function () {
-  it('No error expected', async function () {
-    const result = someFn();
-
-    expect(result).toBe(200);
-  });
-});
+//     expect(result).toBe(true);
+//   });
+// });

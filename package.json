@@ -1,62 +1,97 @@
 {
-  "name": "@fjedi/npm-package-template",
-  "version": "1.1.0",
-  "description": "NPM package template",
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
+  "name": "@fjedi/graphql-react-components",
+  "version": "0.0.2",
+  "description": "A set of helpers for managing apollo-graphql inside react-app",
+  "main": "dist/index.js",
   "files": [
-    "lib/"
+    "dist"
   ],
   "private": false,
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "build": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
     "clean": "rimraf lib",
     "coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "start": "tsc -w",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "build": "rollup -c",
+    "start": "rollup -c -w",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\"",
     "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint",
+    "prepublishOnly": "npm run lint",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fjedi/npm-package-template.git"
+    "url": "git+https://github.com/fjedi/graphql-react-components.git"
   },
   "keywords": [
-    "fjedi"
+    "fjedi",
+    "graphql",
+    "apollo",
+    "react",
+    "typescript"
   ],
   "author": "Alexander Radyushin <r.alex.andr@ya.ru> (https://fjedi.com)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fjedi/npm-package-template/issues"
+    "url": "https://github.com/fjedi/graphql-react-components/issues"
   },
-  "homepage": "https://github.com/fjedi/npm-package-template#readme",
-  "dependencies": {},
+  "homepage": "https://github.com/fjedi/graphql-react-components#readme",
+  "dependencies": {
+    "@apollo/client": "3.2.7",
+    "apollo-cache-updater": "0.1.3"
+  },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "16.0.0",
+    "@rollup/plugin-node-resolve": "10.0.0",
     "@types/expect": "24.3.0",
+    "@types/graphql": "14.5.0",
     "@types/jest": "26.0.15",
     "@types/lodash": "4.14.164",
     "@types/node": "14.14.6",
+    "@types/react": "16.9.56",
+    "@types/react-i18next": "8.1.0",
     "@typescript-eslint/eslint-plugin": "4.6.1",
     "@typescript-eslint/parser": "4.6.1",
+    "antd": "4.8.4",
+    "babel-core": "6.26.3",
+    "babel-runtime": "6.26.0",
     "eslint": "7.12.1",
     "eslint-config-airbnb-typescript": "12.0.0",
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-prettier": "3.1.4",
+    "graphql": "15.4.0",
     "husky": "4.3.0",
+    "i18next": "19.8.4",
     "jest": "26.6.2",
     "lint-staged": "10.5.1",
+    "lodash": "4.17.20",
     "prettier": "2.1.2",
+    "prop-types": "15.7.2",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-i18next": "11.7.3",
     "rimraf": "3.0.2",
+    "rollup": "2.33.3",
+    "rollup-plugin-sass": "1.2.2",
+    "rollup-plugin-typescript2": "0.29.0",
     "ts-jest": "26.4.3",
     "typescript": "4.0.5"
+  },
+  "peerDependencies": {
+    "antd": "^4.8.4",
+    "graphql": "^15.4.0",
+    "react": "^16.8.0",
+    "react-dom": "^17.0.1",
+    "react-i18next": "^11.7.3",
+    "i18next": "^19.8.4",
+    "prop-types": "^15.7.2",
+    "@types/lodash": "^4.14.164",
+    "lodash": "^4.17.20"
   },
   "lint-staged": {
     "*.(js|jsx|ts|tsx)": [
