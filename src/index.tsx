@@ -248,9 +248,10 @@ export type SubscribeToMoreProps = {
 };
 
 export function useSubscribeToMore(props: SubscribeToMoreProps): void {
-  const { subscriptionQueries, variables, dataType, subscribeToMore } = props;
-  const [subscriptions] = useState(initialSubscriptionsSet);
-  const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), []);
+  logger('useSubscribeToMore', props);
+  // const { subscriptionQueries, variables, dataType, subscribeToMore } = props;
+  // const [subscriptions] = useState(initialSubscriptionsSet);
+  // const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), []);
   const subscribe = useCallback(() => {
     // // @ts-ignore
     // [...subscriptions.entries()].forEach(([document, subscription]) => {
