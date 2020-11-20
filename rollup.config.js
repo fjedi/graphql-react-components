@@ -1,6 +1,6 @@
 import typescript from 'rollup-plugin-typescript2';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
+// import commonjs from '@rollup/plugin-commonjs';
 
 import pkg from './package.json';
 
@@ -18,7 +18,7 @@ export default {
   ],
   plugins: [
     nodeResolve({ resolveOnly: ['apollo-cache-updater'] }),
-    commonjs(),
+    // commonjs(),
     typescript({ objectHashIgnoreUnknownHack: false }),
   ],
   external: [
