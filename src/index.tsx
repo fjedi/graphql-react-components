@@ -16,11 +16,13 @@ import {
   QueryResult,
 } from '@apollo/client';
 // @ts-ignore
-import * as ApolloCacheUpdater from 'apollo-cache-updater';
+import * as ApolloCacheUpdater_ from 'apollo-cache-updater';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { get, camelCase, isEqualWith, isEqual, uniq } from 'lodash';
 import { Modal } from 'antd';
+
+const ApolloCacheUpdater = ApolloCacheUpdater_;
 
 export type DataRow = {
   id: string;

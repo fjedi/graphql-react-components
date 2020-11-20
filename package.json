@@ -41,14 +41,14 @@
   },
   "homepage": "https://github.com/fjedi/graphql-react-components#readme",
   "dependencies": {
-    "apollo-cache-updater": "0.1.3"
+    "@apollo/client": "3.2.7",
+    "@types/graphql": "14.5.0",
+    "apollo-cache-updater": "0.1.3",
+    "graphql": "15.4.0"
   },
   "devDependencies": {
-    "@apollo/client": "3.2.7",
-    "@rollup/plugin-commonjs": "16.0.0",
     "@rollup/plugin-node-resolve": "10.0.0",
     "@types/expect": "24.3.0",
-    "@types/graphql": "14.5.0",
     "@types/jest": "26.0.15",
     "@types/lodash": "4.14.164",
     "@types/node": "14.14.6",
@@ -64,7 +64,6 @@
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-prettier": "3.1.4",
-    "graphql": "15.4.0",
     "husky": "4.3.0",
     "i18next": "19.8.4",
     "jest": "26.6.2",
@@ -77,15 +76,13 @@
     "react-i18next": "11.7.3",
     "rimraf": "3.0.2",
     "rollup": "2.33.3",
-    "rollup-plugin-sass": "1.2.2",
+    "rollup-plugin-peer-deps-external": "2.2.4",
     "rollup-plugin-typescript2": "0.29.0",
     "ts-jest": "26.4.3",
     "typescript": "4.0.5"
   },
   "peerDependencies": {
     "antd": "^4.8.4",
-    "@apollo/client": "^3.2.7",
-    "graphql": "^15.4.0",
     "react": "^16.8.0",
     "react-dom": "^17.0.1",
     "react-i18next": "^11.7.3",
