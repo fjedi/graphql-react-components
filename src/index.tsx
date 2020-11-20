@@ -1,11 +1,6 @@
 //
 import * as React from 'react';
-import {
-  // useState,
-  useCallback,
-  // useMemo,
-  useEffect,
-} from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
 import { DocumentNode } from 'graphql';
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
@@ -241,9 +236,9 @@ export function getDataFromSubscriptionEvent(dataType: string) {
   };
 }
 
-// const initialSubscriptionsSet: Map<Document, { variables: unknown; unsubscribe: any }> = new Map(
-//   [],
-// );
+const initialSubscriptionsSet: Map<Document, { variables: unknown; unsubscribe: any }> = new Map(
+  [],
+);
 
 export type SubscribeToMoreProps = {
   subscriptionQueries: Document[];
@@ -253,41 +248,40 @@ export type SubscribeToMoreProps = {
 };
 
 export function useSubscribeToMore(props: SubscribeToMoreProps): void {
-  logger('useSubscribeToMore', props);
-  // const { subscriptionQueries, variables, dataType, subscribeToMore } = props;
-  // const [subscriptions] = useState(initialSubscriptionsSet);
-  // const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), []);
+  const { subscriptionQueries, variables, dataType, subscribeToMore } = props;
+  const [subscriptions] = useState(initialSubscriptionsSet);
+  const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), []);
   const subscribe = useCallback(() => {
-    // // @ts-ignore
-    // [...subscriptions.entries()].forEach(([document, subscription]) => {
-    //   const variablesChanged = !compareValues(variables, subscription.variables);
-    //   if (variablesChanged) {
-    //     logger('SubscriptionHandler.variablesChanged', {
-    //       variables,
-    //       oldVariables: subscription.variables,
-    //       props,
-    //     });
-    //     subscription.unsubscribe();
-    //     subscriptions.delete(document);
-    //   }
-    // });
-    // //
-    // if (Array.isArray(subscriptionQueries) && typeof subscribeToMore === 'function') {
-    //   subscriptionQueries.forEach((document) => {
-    //     if (subscriptions.has(document)) {
-    //       return;
-    //     }
-    //     logger('SubscriptionHandler.initSubscription', variables);
-    //     subscriptions.set(document, {
-    //       variables,
-    //       unsubscribe: subscribeToMore({
-    //         document,
-    //         variables,
-    //         updateQuery,
-    //       }),
-    //     });
-    //   });
-    // }
+    //
+    subscriptions.forEach((subscription, document) => {
+      const variablesChanged = !compareValues(variables, subscription.variables);
+      if (variablesChanged) {
+        logger('SubscriptionHandler.variablesChanged', {
+          variables,
+          oldVariables: subscription.variables,
+          props,
+        });
+        subscription.unsubscribe();
+        subscriptions.delete(document);
+      }
+    });
+    //
+    if (Array.isArray(subscriptionQueries) && typeof subscribeToMore === 'function') {
+      subscriptionQueries.forEach((document) => {
+        if (subscriptions.has(document)) {
+          return;
+        }
+        logger('SubscriptionHandler.initSubscription', variables);
+        subscriptions.set(document, {
+          variables,
+          unsubscribe: subscribeToMore({
+            document,
+            variables,
+            updateQuery,
+          }),
+        });
+      });
+    }
   }, []);
   //
   useEffect(() => {
