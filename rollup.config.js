@@ -16,6 +16,19 @@ export default {
       strict: false,
     },
   ],
-  plugins: [nodeResolve(), commonjs(), typescript({ objectHashIgnoreUnknownHack: false })],
-  external: ['react', 'react-dom'],
+  plugins: [
+    nodeResolve({ resolveOnly: ['apollo-cache-updater'] }),
+    commonjs(),
+    typescript({ objectHashIgnoreUnknownHack: false }),
+  ],
+  external: [
+    'react',
+    'react-dom',
+    '@apollo/client',
+    'antd',
+    'graphql',
+    'i18next',
+    'react-i18next',
+    'lodash',
+  ],
 };
