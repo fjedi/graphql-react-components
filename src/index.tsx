@@ -21,7 +21,7 @@ import { WebSocketLink } from '@apollo/client/link/ws';
 import { onError as onApolloError } from '@apollo/client/link/error';
 import { createUploadLink } from 'apollo-upload-client';
 // @ts-ignore
-import ProgressiveFragmentMatcher from 'apollo-progressive-fragment-matcher';
+import { ProgressiveFragmentMatcher } from 'apollo-progressive-fragment-matcher/lib/fragmentMatcher';
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
 import {
   QueryHookOptions,
