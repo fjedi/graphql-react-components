@@ -21,7 +21,7 @@ import { WebSocketLink } from '@apollo/client/link/ws';
 import { onError as onApolloError } from '@apollo/client/link/error';
 import { createUploadLink } from 'apollo-upload-client';
 // @ts-ignore
-import * as ProgressiveFragmentMatcher_ from 'apollo-progressive-fragment-matcher';
+import ProgressiveFragmentMatcher from 'apollo-progressive-fragment-matcher';
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
 import {
   QueryHookOptions,
@@ -41,7 +41,6 @@ import { useTranslation } from 'react-i18next';
 import { get, camelCase, isEqualWith, isEqual, uniq, pick, omit } from 'lodash';
 import { Modal } from 'antd';
 
-const ProgressiveFragmentMatcher = ProgressiveFragmentMatcher_;
 const ApolloCacheUpdater = ApolloCacheUpdater_;
 
 // @ts-ignore
