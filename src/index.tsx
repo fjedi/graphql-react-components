@@ -13,6 +13,7 @@ import {
   FetchResult,
   MutationResult,
   MutationFunctionOptions,
+  QueryResult,
 } from '@apollo/client';
 // @ts-ignore
 import * as ApolloCacheUpdater from 'apollo-cache-updater';
@@ -25,27 +26,37 @@ export type DataRow = {
   id: string;
 };
 
-export function getListKeyFromDataType(dataType: string) {
+export type DataRowPaginatedList = {
+  rows: DataRow[];
+  count: number;
+};
+
+export type ApolloState = { [k: string]: unknown };
+
+export function getListKeyFromDataType(dataType: string): string {
   return `get${dataType.replace(/y$/, 'ie')}s`;
 }
 
-export function logger(message: string | Error, props = {}) {
+export function logger(message: string | Error, props = {}): void {
   const level = get(props, 'level', 'info');
   if (process.env.RUNTIME_ENV !== 'production') {
     if (!message) {
+      // eslint-disable-next-line no-console
       console.error('Logger has received event without message', props);
       return;
     }
     if (message instanceof Error) {
+      // eslint-disable-next-line no-console
       console.error(message, props);
       return;
     }
+    // eslint-disable-next-line no-console
     console[level](message, props);
   }
 }
 //
 const ValidIdTypes = ['string', 'number'];
-export function compareIds(id1: any, id2: any): boolean {
+export function compareIds(id1: unknown, id2: unknown): boolean {
   //
   if (!ValidIdTypes.includes(typeof id1) || !ValidIdTypes.includes(typeof id2)) {
     return false;
@@ -74,9 +85,9 @@ export function compareValues(a: unknown, b: unknown): boolean {
 }
 
 export function updateAfterMutation(query: DocumentNode, dataType: string) {
-  return (proxy: any, { data }: MutationResult) => {
-    const createdRow = get(data, `create${dataType}`);
-    const removedRow = get(data, `remove${dataType}`);
+  return (proxy: unknown, { data }: MutationResult): void => {
+    const createdRow = get(data, `create${dataType}`) as DataRow | DataRow[];
+    const removedRow = get(data, `remove${dataType}`) as DataRow | DataRow[];
     //
     const mutationResult = createdRow || removedRow;
     if (!mutationResult) {
@@ -131,7 +142,7 @@ export function updateAfterMutation(query: DocumentNode, dataType: string) {
   };
 }
 
-export const Query = ({ pollInterval, ...props }: QueryComponentOptions) => (
+export const Query = ({ pollInterval, ...props }: QueryComponentOptions): JSX.Element => (
   <ApolloQuery
     partialRefetch
     returnPartialData
@@ -146,7 +157,7 @@ Query.defaultProps = { pollInterval: 0 };
 
 //
 export function getDataFromResponse(dataType: string) {
-  return (data: any) => {
+  return (data: QueryResult): DataRowPaginatedList => {
     const dataField = getListKeyFromDataType(dataType);
     if (data && data[dataField]) {
       return data[dataField];
@@ -159,7 +170,7 @@ export function getDataFromResponse(dataType: string) {
 }
 
 export function getDataFromSubscriptionEvent(dataType: string) {
-  return (prev: any, { subscriptionData }: OnSubscriptionDataOptions) => {
+  return (prev: ApolloState, { subscriptionData }: OnSubscriptionDataOptions): ApolloState => {
     if (!subscriptionData.data) return prev;
     const eventPrefix = camelCase(dataType);
     const createdRow = get(subscriptionData, `data.${eventPrefix}Created`);
@@ -176,12 +187,11 @@ export function getDataFromSubscriptionEvent(dataType: string) {
     }
     //
     const listFieldName = getListKeyFromDataType(dataType);
-    const prevData = prev[listFieldName];
-    const isPaginatedList = Array.isArray(prevData?.rows);
+    const prevData = prev[listFieldName] as DataRow[] | DataRowPaginatedList;
     logger(`[SUBSCRIPTION] get ${listFieldName}`, prevData);
 
     if (removedRow) {
-      if (!isPaginatedList) {
+      if (Array.isArray(prevData)) {
         return {
           ...prev,
           [listFieldName]: prevData.filter((e: DataRow) => !compareIds(e.id, removedRow.id)),
@@ -197,7 +207,7 @@ export function getDataFromSubscriptionEvent(dataType: string) {
       };
     }
     //
-    const existRow = (!isPaginatedList ? prevData : prevData.rows).find((e: DataRow) =>
+    const existRow = (Array.isArray(prevData) ? prevData : prevData.rows).find((e: DataRow) =>
       compareIds(e.id, event.id),
     );
     if (existRow) {
@@ -206,7 +216,7 @@ export function getDataFromSubscriptionEvent(dataType: string) {
     }
 
     //
-    if (!isPaginatedList) {
+    if (Array.isArray(prevData)) {
       return {
         ...prev,
         [listFieldName]: [event].concat(prevData),
@@ -235,7 +245,7 @@ export type SubscribeToMoreProps = {
   subscribeToMore: (params: { document: Document; variables: any; updateQuery: any }) => void;
 };
 
-export function useSubscribeToMore(props: SubscribeToMoreProps) {
+export function useSubscribeToMore(props: SubscribeToMoreProps): void {
   const { subscriptionQueries, variables, dataType, subscribeToMore } = props;
   const [subscriptions] = useState(initialSubscriptionsSet);
   const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), []);
@@ -277,7 +287,7 @@ export function useSubscribeToMore(props: SubscribeToMoreProps) {
   }, []);
 }
 
-export function onError(props: { t: TFunction }) {
+export function onError(props: { t: TFunction }): (error: ApolloError) => void {
   const { t } = props;
   // @ts-ignore
   if (props.onError === 'function') {
@@ -328,7 +338,7 @@ export const Mutation = ({ children, autoCommitInterval, mutation, ...props }: M
   return children(mutate, res);
 };
 
-export function useQuery(query: DocumentNode, options: QueryHookOptions) {
+export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryResult {
   return ApolloUseQuery(query, {
     partialRefetch: true,
     returnPartialData: true,
