@@ -1,6 +1,11 @@
 //
 import * as React from 'react';
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import {
+  // useState,
+  useCallback,
+  // useMemo,
+  useEffect,
+} from 'react';
 import * as PropTypes from 'prop-types';
 import { DocumentNode } from 'graphql';
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
@@ -236,9 +241,9 @@ export function getDataFromSubscriptionEvent(dataType: string) {
   };
 }
 
-const initialSubscriptionsSet: Map<Document, { variables: unknown; unsubscribe: any }> = new Map(
-  [],
-);
+// const initialSubscriptionsSet: Map<Document, { variables: unknown; unsubscribe: any }> = new Map(
+//   [],
+// );
 
 export type SubscribeToMoreProps = {
   subscriptionQueries: Document[];
