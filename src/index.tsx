@@ -252,36 +252,36 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
   const [subscriptions] = useState(initialSubscriptionsSet);
   const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), []);
   const subscribe = useCallback(() => {
-    // @ts-ignore
-    [...subscriptions.entries()].forEach(([document, subscription]) => {
-      const variablesChanged = !compareValues(variables, subscription.variables);
-      if (variablesChanged) {
-        logger('SubscriptionHandler.variablesChanged', {
-          variables,
-          oldVariables: subscription.variables,
-          props,
-        });
-        subscription.unsubscribe();
-        subscriptions.delete(document);
-      }
-    });
-    //
-    if (Array.isArray(subscriptionQueries) && typeof subscribeToMore === 'function') {
-      subscriptionQueries.forEach((document) => {
-        if (subscriptions.has(document)) {
-          return;
-        }
-        logger('SubscriptionHandler.initSubscription', variables);
-        subscriptions.set(document, {
-          variables,
-          unsubscribe: subscribeToMore({
-            document,
-            variables,
-            updateQuery,
-          }),
-        });
-      });
-    }
+    // // @ts-ignore
+    // [...subscriptions.entries()].forEach(([document, subscription]) => {
+    //   const variablesChanged = !compareValues(variables, subscription.variables);
+    //   if (variablesChanged) {
+    //     logger('SubscriptionHandler.variablesChanged', {
+    //       variables,
+    //       oldVariables: subscription.variables,
+    //       props,
+    //     });
+    //     subscription.unsubscribe();
+    //     subscriptions.delete(document);
+    //   }
+    // });
+    // //
+    // if (Array.isArray(subscriptionQueries) && typeof subscribeToMore === 'function') {
+    //   subscriptionQueries.forEach((document) => {
+    //     if (subscriptions.has(document)) {
+    //       return;
+    //     }
+    //     logger('SubscriptionHandler.initSubscription', variables);
+    //     subscriptions.set(document, {
+    //       variables,
+    //       unsubscribe: subscribeToMore({
+    //         document,
+    //         variables,
+    //         updateQuery,
+    //       }),
+    //     });
+    //   });
+    // }
   }, []);
   //
   useEffect(() => {
