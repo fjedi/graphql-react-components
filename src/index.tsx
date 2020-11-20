@@ -2,7 +2,26 @@
 import * as React from 'react';
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
-import { DocumentNode } from 'graphql';
+import { Context } from 'koa';
+import { DocumentNode, OperationDefinitionNode } from 'graphql';
+// Apollo client library
+import {
+  ApolloClient as Client,
+  from as mergeLinks,
+  split,
+  ApolloClientOptions as ClientOptions,
+  NormalizedCacheObject,
+} from '@apollo/client/core';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
+import DebounceLink from 'apollo-link-debounce';
+import { getMainDefinition } from 'apollo-utilities';
+import { createHttpLink } from '@apollo/client/link/http';
+import { WebSocketLink } from '@apollo/client/link/ws';
+import { onError as onApolloError } from '@apollo/client/link/error';
+import { createUploadLink } from 'apollo-upload-client';
+// @ts-ignore
+import * as ProgressiveFragmentMatcher_ from 'apollo-progressive-fragment-matcher';
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
 import {
   QueryHookOptions,
@@ -19,10 +38,15 @@ import {
 import * as ApolloCacheUpdater_ from 'apollo-cache-updater';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
-import { get, camelCase, isEqualWith, isEqual, uniq } from 'lodash';
+import { get, camelCase, isEqualWith, isEqual, uniq, pick, omit } from 'lodash';
 import { Modal } from 'antd';
 
+const ProgressiveFragmentMatcher = ProgressiveFragmentMatcher_;
 const ApolloCacheUpdater = ApolloCacheUpdater_;
+
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TodoAny = any;
 
 export type DataRow = {
   id: string;
@@ -35,9 +59,15 @@ export type DataRowPaginatedList = {
 
 export type ApolloState = { [k: string]: unknown };
 
-export function getListKeyFromDataType(dataType: string): string {
-  return `get${dataType.replace(/y$/, 'ie')}s`;
-}
+export type ApolloClientOptions = ClientOptions<TodoAny>;
+
+export type ApolloClient = Client<TodoAny>;
+
+export const fragmentMatcher = new ProgressiveFragmentMatcher({
+  strategy: 'extension',
+});
+
+export const DEFAULT_DEBOUNCE_TIMEOUT = 300;
 
 export function logger(message: string | Error, props = {}): void {
   const level = get(props, 'level', 'info');
@@ -56,6 +86,128 @@ export function logger(message: string | Error, props = {}): void {
     console[level](message, props);
   }
 }
+
+//
+export const errorLink = onApolloError(({ response, graphQLErrors, networkError }) => {
+  if (graphQLErrors && response) {
+    // @ts-ignore
+    response.errors = graphQLErrors.map((graphQLError) => {
+      const { message, path } = graphQLError;
+      logger(`[GraphQL error]: Message: ${message}, Path: ${path}`, graphQLError);
+      return new Error(message);
+    });
+  }
+
+  if (networkError) logger(`[Network error]: ${networkError}`);
+});
+
+// Helper function to create a new Apollo client, by merging in
+// passed options alongside any set by `config.setApolloClientOptions` and defaults
+export function createClient(opts: ApolloClientOptions): ApolloClient {
+  return new Client({
+    name: 'web',
+    version: process.env.APP_VERSION,
+    ...opts,
+  });
+}
+
+export function serverClient(ctx: Context, o: ApolloClientOptions): ApolloClient {
+  const headers = {
+    Cookie: ctx.request.headers.cookie,
+    // Pick some client's headers to bypass them to API
+    ...pick(ctx.request.headers, [
+      'x-real-ip',
+      'x-forwarded-for',
+      'user-agent',
+      'lang',
+      'accept-language',
+      'accept-encoding',
+    ]),
+  };
+  //
+  const httpLink = createHttpLink({
+    uri: o.uri,
+    // credentials: 'same-origin',
+    credentials: 'include',
+    headers,
+  });
+  const persistedQueryLink = createPersistedQueryLink({
+    // useGETForHashedQueries: true,
+  });
+  const cache = new InMemoryCache({ fragmentMatcher });
+  //
+  return createClient({
+    ssrMode: true,
+    // @ts-ignore
+    cache,
+    link: mergeLinks([
+      fragmentMatcher.link(),
+      errorLink,
+      //
+      persistedQueryLink,
+      httpLink,
+    ]),
+    ...omit(o, ['cache', 'ssrMode']),
+  });
+}
+
+// Creates a new browser client
+export function browserClient(): ApolloClient {
+  // @ts-ignore
+  const { __APOLLO_STATE__: state } = window as { __APOLLO_STATE__: NormalizedCacheObject };
+  const uri = process.env.API_URL || '';
+  const isSSL = uri.indexOf('https') === 0;
+  const wsURI = process.env.SUBSCRIPTIONS_URL || '';
+  //
+  const wsLink = new WebSocketLink({
+    uri: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
+    options: {
+      reconnect: true,
+      connectionParams: {
+        // token: 'get token from the cookies?',
+      },
+    },
+  });
+  //
+  const httpLink = createUploadLink({
+    uri,
+    credentials: 'include',
+  });
+  const persistedQueryLink = createPersistedQueryLink({
+    // useGETForHashedQueries: true,
+  });
+  //
+  const cache = state
+    ? new InMemoryCache({ fragmentMatcher }).restore(state)
+    : new InMemoryCache({ fragmentMatcher });
+  //
+  return createClient({
+    // @ts-ignore
+    cache,
+    link: split(
+      // split based on operation type
+      ({ query }) => {
+        const { kind, operation } = getMainDefinition(query) as OperationDefinitionNode;
+        return kind === 'OperationDefinition' && operation === 'subscription';
+      },
+      wsLink,
+      mergeLinks([
+        fragmentMatcher.link(),
+        new DebounceLink(DEFAULT_DEBOUNCE_TIMEOUT),
+        errorLink,
+        //
+        persistedQueryLink,
+        httpLink,
+      ]),
+    ),
+    ssrForceFetchDelay: 100,
+  });
+}
+
+export function getListKeyFromDataType(dataType: string): string {
+  return `get${dataType.replace(/y$/, 'ie')}s`;
+}
+
 //
 const ValidIdTypes = ['string', 'number'];
 export function compareIds(id1: unknown, id2: unknown): boolean {
@@ -306,8 +458,8 @@ export function onError(props: { t: TFunction }): (error: ApolloError) => void {
 }
 
 export type MutateFn = (
-  options?: MutationFunctionOptions<any, Record<string, any>> | undefined,
-) => Promise<FetchResult<any, Record<string, any>, Record<string, any>>>;
+  options?: MutationFunctionOptions<TodoAny, Record<string, TodoAny>> | undefined,
+) => Promise<FetchResult<TodoAny, Record<string, TodoAny>, Record<string, TodoAny>>>;
 
 export type MutationProps = {
   children: (mutate: MutateFn, res: MutationResult) => void;
@@ -315,7 +467,12 @@ export type MutationProps = {
   mutation: DocumentNode;
 };
 
-export const Mutation = ({ children, autoCommitInterval, mutation, ...props }: MutationProps) => {
+export const Mutation = ({
+  children,
+  autoCommitInterval,
+  mutation,
+  ...props
+}: MutationProps): void => {
   const { t } = useTranslation();
   //
   const [mutate, res] = useMutation(mutation, {
