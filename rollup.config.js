@@ -23,9 +23,9 @@ export default {
     //
     nodeResolve(),
     commonjs({
-      namedExports: {
-        'node_modules/subscriptions-transport-ws/dist/index.js': ['SubscriptionClient'],
-      },
+      // namedExports: {
+      //   'node_modules/subscriptions-transport-ws/dist/index.js': ['SubscriptionClient'],
+      // },
     }),
     typescript({ objectHashIgnoreUnknownHack: false }),
   ],
