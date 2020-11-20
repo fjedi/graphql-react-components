@@ -1,5 +1,6 @@
 import typescript from 'rollup-plugin-typescript2';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import nodeResolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 //
 import pkg from './package.json';
@@ -20,7 +21,8 @@ export default {
     // Preferably set as first plugin.
     peerDepsExternal(),
     //
-    nodeResolve({ resolveOnly: ['graphql', '@apollo/client', 'apollo-cache-updater'] }),
+    nodeResolve(),
+    commonjs(),
     typescript({ objectHashIgnoreUnknownHack: false }),
   ],
 };
