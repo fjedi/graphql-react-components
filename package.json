@@ -1,6 +1,6 @@
 {
   "name": "@fjedi/graphql-react-components",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A set of helpers for managing apollo-graphql inside react-app",
   "main": "dist/index.js",
   "files": [
@@ -16,7 +16,7 @@
     "lint:fix": "eslint . --fix",
     "build": "rollup -c",
     "start": "rollup -c -w",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\"",
+    "format": "prettier --write \"src/**/*.tsx\"",
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint",
     "preversion": "npm run lint",
