@@ -35,7 +35,7 @@ import {
   QueryResult,
 } from '@apollo/client';
 // @ts-ignore
-import * as ApolloCacheUpdater_ from 'apollo-cache-updater';
+import ApolloCacheUpdater_ from 'apollo-cache-updater';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { get, camelCase, isEqualWith, isEqual, uniq, pick, omit } from 'lodash';
