@@ -501,7 +501,7 @@ export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryR
     partialRefetch: true,
     returnPartialData: true,
     errorPolicy: 'all',
-    // fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-and-network',
     ...(options || {}),
   });
 }
