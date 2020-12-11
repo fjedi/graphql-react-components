@@ -505,6 +505,6 @@ export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryR
     ...(options || {}),
   });
 }
-
+export { MockedProvider } from '@apollo/client/testing';
 export { useMutation, useSubscription, ApolloProvider, ApolloConsumer } from '@apollo/client';
 export { graphql, withApollo } from '@apollo/client/react/hoc';
