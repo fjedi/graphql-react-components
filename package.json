@@ -1,6 +1,6 @@
 {
   "name": "@fjedi/graphql-react-components",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A set of helpers for managing apollo-graphql inside react-app",
   "main": "dist/index.js",
   "files": [
@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/fjedi/graphql-react-components#readme",
   "dependencies": {
-    "@apollo/client": "3.2.7",
+    "@apollo/client": "3.3.5",
     "@types/apollo-upload-client": "14.1.0",
     "@types/koa": "2.11.6",
     "apollo-cache-inmemory": "1.6.6",
