@@ -70,7 +70,10 @@ export const DEFAULT_DEBOUNCE_TIMEOUT = 300;
 
 export function logger(message: string | Error, props = {}): void {
   const level = get(props, 'level', 'info');
-  if (process.env.RUNTIME_ENV !== 'production') {
+  if (
+    process.env.NEXT_PUBLIC_RUNTIME_ENV !== 'production' &&
+    process.env.RUNTIME_ENV !== 'production'
+  ) {
     if (!message) {
       // eslint-disable-next-line no-console
       console.error('Logger has received event without message', props);
@@ -105,7 +108,7 @@ export const errorLink = onApolloError(({ response, graphQLErrors, networkError 
 export function createClient(opts: ApolloClientOptions): ApolloClient {
   return new Client({
     name: 'web',
-    version: process.env.APP_VERSION,
+    version: process.env.NEXT_PUBLIC_APP_VERSION || process.env.APP_VERSION,
     ...opts,
   });
 }
@@ -154,9 +157,9 @@ export function serverClient(ctx: Context, o: ApolloClientOptions): ApolloClient
 export function browserClient(): ApolloClient {
   const state: NormalizedCacheObject | undefined =
     typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
-  const uri = process.env.API_URL || '';
+  const uri = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || '';
   const isSSL = uri.indexOf('https') === 0;
-  const wsURI = process.env.SUBSCRIPTIONS_URL || '';
+  const wsURI = process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || process.env.SUBSCRIPTIONS_URL || '';
   //
   const wsLink = new WebSocketLink({
     uri: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
