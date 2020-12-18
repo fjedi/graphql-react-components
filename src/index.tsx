@@ -152,8 +152,8 @@ export function serverClient(ctx: Context, o: ApolloClientOptions): ApolloClient
 
 // Creates a new browser client
 export function browserClient(): ApolloClient {
-  // @ts-ignore
-  const { __APOLLO_STATE__: state } = window as { __APOLLO_STATE__: NormalizedCacheObject };
+  const state: NormalizedCacheObject | undefined =
+    typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
   const uri = process.env.API_URL || '';
   const isSSL = uri.indexOf('https') === 0;
   const wsURI = process.env.SUBSCRIPTIONS_URL || '';
@@ -506,5 +506,11 @@ export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryR
   });
 }
 export { MockedProvider } from '@apollo/client/testing';
-export { useMutation, useSubscription, ApolloProvider, ApolloConsumer } from '@apollo/client';
+export {
+  useMutation,
+  useSubscription,
+  ApolloProvider,
+  ApolloConsumer,
+  InMemoryCache,
+} from '@apollo/client';
 export { graphql, withApollo } from '@apollo/client/react/hoc';
