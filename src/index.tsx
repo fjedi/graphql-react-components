@@ -512,6 +512,7 @@ export { MockedProvider } from '@apollo/client/testing';
 export {
   useMutation,
   useSubscription,
+  useApolloClient,
   ApolloProvider,
   ApolloConsumer,
   InMemoryCache,
