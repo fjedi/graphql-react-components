@@ -314,9 +314,8 @@ Query.defaultProps = { pollInterval: 0 };
 //
 export function getDataFromResponse(dataType: string) {
   return (data: QueryResult): DataRowPaginatedList => {
-    const dataField = getListKeyFromDataType(dataType);
-    if (data && data[dataField]) {
-      return data[dataField];
+    if (data) {
+      return data[`get${dataType}List`] || data[getListKeyFromDataType(dataType)];
     }
     return {
       rows: [],
