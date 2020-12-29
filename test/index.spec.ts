@@ -1,9 +1,11 @@
-// import { compareIds } from '../src';
+import { getListKeyFromDataType } from '../src';
 
-// describe('Test graphql-react-components helpers', function () {
-//   it('No error expected', async function () {
-//     const result = compareIds('1', '2');
+describe('Test graphql-react-components helpers', function () {
+  it('Test "getListKeyFromDataType" function', async function () {
+    const dataField1 = getListKeyFromDataType('NodeStatus');
+    const dataField2 = getListKeyFromDataType('Company');
 
-//     expect(result).toBe(true);
-//   });
-// });
+    expect(dataField1).toBe('getNodeStatuses');
+    expect(dataField2).toBe('getCompanies');
+  });
+});
