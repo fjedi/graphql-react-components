@@ -207,7 +207,7 @@ export function browserClient(): ApolloClient {
 }
 
 export function getListKeyFromDataType(dataType: string): string {
-  return `get${dataType.replace(/y$/, 'ie')}s`;
+  return `get${dataType.replace(/s$/, 'se').replace(/y$/, 'ie')}s`;
 }
 
 //
