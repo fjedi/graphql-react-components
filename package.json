@@ -1,6 +1,6 @@
 {
   "name": "@fjedi/graphql-react-components",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "A set of helpers for managing apollo-graphql inside react-app",
   "main": "dist/index.js",
   "files": [
@@ -65,7 +65,7 @@
     "antd": "4.10.0",
     "babel-core": "6.26.3",
     "babel-runtime": "6.26.0",
-    "eslint": "7.15.0",
+    "eslint": "7.17.0",
     "eslint-config-airbnb-typescript": "12.0.0",
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-import": "2.22.1",
