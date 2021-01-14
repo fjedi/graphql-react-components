@@ -6,6 +6,7 @@ import { Context } from 'koa';
 import { DocumentNode, OperationDefinitionNode } from 'graphql';
 // Apollo client library
 import {
+  ApolloLink,
   ApolloClient as Client,
   from as mergeLinks,
   split,
@@ -171,6 +172,18 @@ export function browserClient(): ApolloClient {
     },
   });
   //
+  const metadataLink = new ApolloLink((operation, forward) => {
+    // add the recent-activity custom header to the headers
+    operation.setContext(({ headers = {} }) => ({
+      headers: {
+        ...headers,
+        'x-timezone-offset': new Date().getTimezoneOffset(),
+      },
+    }));
+
+    return forward(operation);
+  });
+  //
   const httpLink = createUploadLink({
     uri,
     credentials: 'include',
@@ -194,6 +207,7 @@ export function browserClient(): ApolloClient {
       },
       wsLink,
       mergeLinks([
+        metadataLink,
         fragmentMatcher.link(),
         new DebounceLink(DEFAULT_DEBOUNCE_TIMEOUT),
         errorLink,
