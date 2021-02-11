@@ -81,7 +81,7 @@
     "react-dom": "17.0.1",
     "react-i18next": "11.8.5",
     "rimraf": "3.0.2",
-    "rollup": "2.36.1",
+    "rollup": "2.38.5",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-node-resolve": "5.2.0",
     "rollup-plugin-peer-deps-external": "2.2.4",
