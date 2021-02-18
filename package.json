@@ -43,7 +43,7 @@
   "dependencies": {
     "@apollo/client": "3.3.11",
     "@types/apollo-upload-client": "14.1.0",
-    "@types/koa": "2.11.8",
+    "@types/koa": "2.13.0",
     "apollo-cache-inmemory": "1.6.6",
     "apollo-cache-updater": "0.1.3",
     "apollo-link-debounce": "2.1.0",
