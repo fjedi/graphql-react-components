@@ -420,16 +420,16 @@ export type SubscribeToMoreProps = {
 export function useSubscribeToMore(props: SubscribeToMoreProps): void {
   const { subscriptionQueries, variables, dataType, subscribeToMore } = props;
   const [subscriptions] = useState(initialSubscriptionsSet);
-  const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), []);
+  const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), [dataType]);
   const subscribe = useCallback(() => {
     //
     subscriptions.forEach((subscription, document) => {
       const variablesChanged = !compareValues(variables, subscription.variables);
       if (variablesChanged) {
         logger('SubscriptionHandler.variablesChanged', {
+          dataType,
           variables,
           oldVariables: subscription.variables,
-          props,
         });
         subscription.unsubscribe();
         subscriptions.delete(document);
@@ -452,11 +452,11 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
         });
       });
     }
-  }, []);
+  }, [subscriptions, updateQuery, subscriptionQueries, variables, dataType, subscribeToMore]);
   //
   useEffect(() => {
     subscribe();
-  }, []);
+  }, [subscribe]);
 }
 
 export function onError(props: { t: TFunction }): (error: ApolloError) => void {
