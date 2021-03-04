@@ -406,9 +406,10 @@ export function getDataFromSubscriptionEvent(dataType: string) {
   };
 }
 
-const initialSubscriptionsSet: Map<Document, { variables: unknown; unsubscribe: any }> = new Map(
-  [],
-);
+const initialSubscriptionsSet: Map<
+  Document,
+  { dataType: string; variables: unknown; unsubscribe: any }
+> = new Map([]);
 
 export type SubscribeToMoreProps = {
   subscriptionQueries: Document[];
@@ -424,7 +425,8 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
   const subscribe = useCallback(() => {
     //
     subscriptions.forEach((subscription, document) => {
-      const variablesChanged = !compareValues(variables, subscription.variables);
+      const variablesChanged =
+        dataType === subscription.dataType && !compareValues(variables, subscription.variables);
       if (variablesChanged) {
         logger('SubscriptionHandler.variablesChanged', {
           dataType,
@@ -441,8 +443,9 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
         if (subscriptions.has(document)) {
           return;
         }
-        logger('SubscriptionHandler.initSubscription', variables);
+        logger('SubscriptionHandler.initSubscription', { dataType, variables });
         subscriptions.set(document, {
+          dataType,
           variables,
           unsubscribe: subscribeToMore({
             document,
