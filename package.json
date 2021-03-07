@@ -62,7 +62,7 @@
     "@types/react-i18next": "8.1.0",
     "@typescript-eslint/eslint-plugin": "4.16.1",
     "@typescript-eslint/parser": "4.16.1",
-    "antd": "4.12.3",
+    "antd": "4.13.1",
     "babel-core": "6.26.3",
     "babel-runtime": "6.26.0",
     "eslint": "7.21.0",
