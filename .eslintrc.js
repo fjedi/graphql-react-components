@@ -1,11 +1,18 @@
 module.exports = {
-  plugins: ['@typescript-eslint', 'prettier', 'import', 'react', 'react-hooks', 'compat', 'security'],
+  plugins: [
+    '@typescript-eslint',
+    'prettier',
+    'import',
+    'react',
+    'react-hooks',
+    'compat',
+    'security',
+  ],
   extends: [
     'airbnb-typescript/base',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
     'prettier',
-    'prettier/@typescript-eslint',
   ],
   env: {
     es6: true,
@@ -38,7 +45,10 @@ module.exports = {
     '@typescript-eslint/lines-between-class-members': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
 
-    'react/forbid-prop-types': [1, { forbid: ['any', 'object'], ignore: ['style', 'data', 'variables'] }],
+    'react/forbid-prop-types': [
+      1,
+      { forbid: ['any', 'object'], ignore: ['style', 'data', 'variables'] },
+    ],
     'react/static-property-placement': 1,
     'react/jsx-wrap-multilines': 1,
     'react/jsx-fragments': 0,
