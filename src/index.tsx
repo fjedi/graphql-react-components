@@ -67,6 +67,13 @@ export const fragmentMatcher = new ProgressiveFragmentMatcher({
   strategy: 'extension',
 });
 
+export type ApolloUploadFetchOptions = RequestInit & {
+  method: string;
+  onProgress?: (this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) => void | null;
+  onAbortPossible: (abortHandler: () => void) => void;
+  headers: Headers;
+};
+
 export const DEFAULT_DEBOUNCE_TIMEOUT = 300;
 
 export function logger(message: string | Error, props = {}): void {
@@ -103,6 +110,63 @@ export const errorLink = onApolloError(({ response, graphQLErrors, networkError 
 
   if (networkError) logger(`[Network error]: ${networkError}`);
 });
+
+export function parseXHRHeaders(rawHeaders: string): Headers {
+  const headers = new Headers();
+  // Replace instances of \r\n and \n followed by at least one space or horizontal tab with a space
+  // https://tools.ietf.org/html/rfc7230#section-3.2
+  const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
+  preProcessedHeaders.split(/\r?\n/).forEach((line: any) => {
+    const parts = line.split(':');
+    const key = parts.shift().trim();
+    if (key) {
+      const value = parts.join(':').trim();
+      headers.append(key, value);
+    }
+  });
+  return headers;
+}
+
+export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Promise<Response> =>
+  new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = () => {
+      const opts: {
+        status: XMLHttpRequest['status'];
+        statusText: string;
+        headers: Headers;
+        url?: string | null;
+      } = {
+        status: xhr.status,
+        statusText: xhr.statusText,
+        headers: parseXHRHeaders(xhr.getAllResponseHeaders() || ''),
+      };
+      opts.url = 'responseURL' in xhr ? xhr.responseURL : opts.headers.get('X-Request-URL');
+      const body = 'response' in xhr ? xhr.response : (xhr as XMLHttpRequest).responseText;
+      resolve(new Response(body, opts));
+    };
+    xhr.onerror = () => {
+      reject(new TypeError('Network request failed'));
+    };
+    xhr.ontimeout = () => {
+      reject(new TypeError('Network request failed'));
+    };
+    xhr.open(options.method, url, true);
+
+    Object.keys(options.headers).forEach((key) => {
+      xhr.setRequestHeader(key, options.headers[key]);
+    });
+
+    if (xhr.upload && typeof options.onProgress === 'function') {
+      xhr.upload.onprogress = options.onProgress;
+    }
+
+    options.onAbortPossible(() => {
+      xhr.abort();
+    });
+
+    xhr.send(options.body);
+  });
 
 // Helper function to create a new Apollo client, by merging in
 // passed options alongside any set by `config.setApolloClientOptions` and defaults
@@ -187,6 +251,12 @@ export function browserClient(): ApolloClient {
   const httpLink = createUploadLink({
     uri,
     credentials: 'include',
+    fetch(url: string, options: ApolloUploadFetchOptions) {
+      if (typeof options.onProgress === 'function') {
+        return uploadFetch(url, options);
+      }
+      return fetch(url, options);
+    },
   });
   const persistedQueryLink = createPersistedQueryLink({
     // useGETForHashedQueries: true,
