@@ -41,6 +41,7 @@ import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { get, camelCase, isEqualWith, isEqual, uniq, pick, omit } from 'lodash';
 import { Modal } from 'antd';
+import { DefaultError } from '@fjedi/errors';
 
 const ApolloCacheUpdater = ApolloCacheUpdater_;
 
@@ -104,7 +105,9 @@ export const errorLink = onApolloError(({ response, graphQLErrors, networkError 
     response.errors = graphQLErrors.map((graphQLError) => {
       const { message, path } = graphQLError;
       logger(`[GraphQL error]: Message: ${message}, Path: ${path}`, graphQLError);
-      return new Error(message);
+      return new DefaultError(message, {
+        originalError: graphQLError,
+      });
     });
   }
 
