@@ -130,6 +130,7 @@ export function parseXHRHeaders(rawHeaders: string): Headers {
 export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Promise<Response> =>
   new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    xhr.withCredentials = options.credentials !== 'omit';
     xhr.onload = () => {
       const opts: {
         status: XMLHttpRequest['status'];
