@@ -107,6 +107,7 @@ export const errorLink = onApolloError(({ response, graphQLErrors, networkError 
       logger(`[GraphQL error]: Message: ${message}, Path: ${path}`, graphQLError);
       return new DefaultError(message, {
         originalError: graphQLError,
+        meta: graphQLError.extensions,
       });
     });
   }
