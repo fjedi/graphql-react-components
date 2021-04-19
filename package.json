@@ -61,7 +61,7 @@
     "@types/react": "17.0.3",
     "@typescript-eslint/eslint-plugin": "4.22.0",
     "@typescript-eslint/parser": "4.22.0",
-    "antd": "4.15.1",
+    "antd": "4.15.2",
     "babel-core": "6.26.3",
     "babel-runtime": "6.26.0",
     "eslint": "7.24.0",
@@ -95,7 +95,7 @@
   },
   "peerDependencies": {
     "@types/lodash": "^4.14.164",
-    "antd": "^4.12.3",
+    "antd": "^4.12.3 || ^4.15.1",
     "i18next": "^19.8.4",
     "lodash": "^4.17.20",
     "prop-types": "^15.7.2",
