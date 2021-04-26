@@ -626,6 +626,7 @@ export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryR
 }
 export { MockedProvider } from '@apollo/client/testing';
 export {
+  useLazyQuery,
   useMutation,
   useSubscription,
   useApolloClient,
