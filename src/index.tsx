@@ -224,10 +224,12 @@ export function serverClient(ctx: Context, o: ApolloClientOptions): ApolloClient
   });
 }
 
+export type BrowserClientMiddleware = (operation: Operation) => void;
+
 export type BrowserClientParams = {
   url?: string;
   wsURL?: string;
-  middlewares: (operation: Operation) => void[];
+  middlewares: BrowserClientMiddleware[];
 };
 
 // Creates a new browser client
