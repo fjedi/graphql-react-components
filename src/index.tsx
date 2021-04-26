@@ -2,7 +2,6 @@
 import * as React from 'react';
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
-import { Context } from 'koa';
 import { DocumentNode, OperationDefinitionNode } from 'graphql';
 // Apollo client library
 import {
@@ -41,7 +40,7 @@ import ApolloCacheUpdater_ from 'apollo-cache-updater';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { get, camelCase, isEqualWith, isEqual, uniq, pick, omit } from 'lodash';
-import { Modal } from 'antd';
+import Modal from 'antd/lib/modal';
 import { DefaultError } from '@fjedi/errors';
 
 const ApolloCacheUpdater = ApolloCacheUpdater_;
@@ -184,10 +183,12 @@ export function createClient(opts: ApolloClientOptions): ApolloClient {
   });
 }
 
-export function serverClient(ctx: Context, o: ApolloClientOptions): ApolloClient {
+export function serverClient<TContext>(ctx: TContext, o: ApolloClientOptions): ApolloClient {
   const headers = {
+    // @ts-ignore
     Cookie: ctx.request.headers.cookie,
     // Pick some client's headers to bypass them to API
+    // @ts-ignore
     ...pick(ctx.request.headers, [
       'x-real-ip',
       'x-forwarded-for',
