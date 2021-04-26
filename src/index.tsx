@@ -229,7 +229,7 @@ export type BrowserClientMiddleware = (operation: Operation) => void;
 export type BrowserClientParams = {
   url?: string;
   wsURL?: string;
-  middlewares: BrowserClientMiddleware[];
+  middlewares?: BrowserClientMiddleware[];
 };
 
 // Creates a new browser client
