@@ -12,6 +12,7 @@ import {
   split,
   ApolloClientOptions as ClientOptions,
   NormalizedCacheObject,
+  Operation,
 } from '@apollo/client/core';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
@@ -223,13 +224,21 @@ export function serverClient(ctx: Context, o: ApolloClientOptions): ApolloClient
   });
 }
 
+export type BrowserClientParams = {
+  url?: string;
+  wsURL?: string;
+  middlewares: (operation: Operation) => void[];
+};
+
 // Creates a new browser client
-export function browserClient(): ApolloClient {
+export function browserClient(params?: BrowserClientParams): ApolloClient {
+  const { url, wsURL, middlewares } = params || {};
   const state: NormalizedCacheObject | undefined =
     typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
-  const uri = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || '';
+  const uri = url || process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || '';
   const isSSL = uri.indexOf('https') === 0;
-  const wsURI = process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || process.env.SUBSCRIPTIONS_URL || '';
+  const wsURI =
+    wsURL || process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || process.env.SUBSCRIPTIONS_URL || '';
   //
   const wsLink = new WebSocketLink({
     uri: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
@@ -242,6 +251,16 @@ export function browserClient(): ApolloClient {
   });
   //
   const metadataLink = new ApolloLink((operation, forward) => {
+    //
+    if (Array.isArray(middlewares)) {
+      middlewares.forEach((middleware) => {
+        //
+        if (typeof middleware !== 'function') {
+          return;
+        }
+        middleware(operation);
+      });
+    }
     // add the recent-activity custom header to the headers
     operation.setContext(({ headers = {} }) => ({
       headers: {
@@ -256,11 +275,11 @@ export function browserClient(): ApolloClient {
   const httpLink = createUploadLink({
     uri,
     credentials: 'include',
-    fetch(url: string, options: ApolloUploadFetchOptions) {
+    fetch(u: string, options: ApolloUploadFetchOptions) {
       if (typeof options.onProgress === 'function') {
-        return uploadFetch(url, options);
+        return uploadFetch(u, options);
       }
-      return fetch(url, options);
+      return fetch(u, options);
     },
   });
   const persistedQueryLink = createPersistedQueryLink({
