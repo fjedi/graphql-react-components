@@ -49,7 +49,7 @@
     "apollo-link-debounce": "3.0.0",
     "apollo-link-persisted-queries": "0.2.2",
     "apollo-progressive-fragment-matcher": "1.0.8",
-    "apollo-upload-client": "14.1.3",
+    "apollo-upload-client": "15.0.0",
     "apollo-utilities": "1.3.4",
     "graphql": "15.5.0"
   },
