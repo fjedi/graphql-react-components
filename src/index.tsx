@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
 import { DocumentNode, OperationDefinitionNode } from 'graphql';
 // Apollo client library
+// eslint-disable-next-line import/no-extraneous-dependencies
 import {
   ApolloLink,
   ApolloClient as Client,
@@ -17,12 +18,16 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
 import DebounceLink from 'apollo-link-debounce';
 import { getMainDefinition } from 'apollo-utilities';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { createHttpLink } from '@apollo/client/link/http';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { WebSocketLink } from '@apollo/client/link/ws';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { onError as onApolloError } from '@apollo/client/link/error';
 import { createUploadLink } from 'apollo-upload-client';
 // @ts-ignore
 import { ProgressiveFragmentMatcher } from 'apollo-progressive-fragment-matcher/lib/fragmentMatcher';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
 import {
   QueryHookOptions,
@@ -624,6 +629,7 @@ export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryR
     ...(options || {}),
   });
 }
+// eslint-disable-next-line import/no-extraneous-dependencies
 export { MockedProvider } from '@apollo/client/testing';
 export {
   useLazyQuery,
@@ -634,4 +640,5 @@ export {
   ApolloConsumer,
   InMemoryCache,
 } from '@apollo/client';
+// eslint-disable-next-line import/no-extraneous-dependencies
 export { graphql, withApollo } from '@apollo/client/react/hoc';
