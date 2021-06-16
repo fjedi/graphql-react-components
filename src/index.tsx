@@ -49,7 +49,6 @@ import Modal from 'antd/lib/modal';
 import { DefaultError } from '@fjedi/errors';
 
 const ApolloCacheUpdater = ApolloCacheUpdater_;
-const viteEnv = get(import.meta, 'env', {}); // support vitejs public env-vars
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,7 +85,6 @@ export const DEFAULT_DEBOUNCE_TIMEOUT = 300;
 export function logger(message: string | Error, props = {}): void {
   const level = get(props, 'level', 'info');
   if (
-    viteEnv.VITE_RUNTIME_ENV !== 'production' && // support vitejs public env-vars naming convention
     process.env.NEXT_PUBLIC_RUNTIME_ENV !== 'production' && // support public nextjs env-vars
     process.env.RUNTIME_ENV !== 'production'
   ) {
@@ -186,7 +184,6 @@ export function createClient(opts: ApolloClientOptions): ApolloClient {
   return new Client({
     name: 'web',
     version:
-      viteEnv.VITE_APP_VERSION || // support vitejs public env-vars
       process.env.NEXT_PUBLIC_APP_VERSION || // support public nextjs env-vars
       process.env.APP_VERSION,
     ...opts,
@@ -250,14 +247,12 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
     typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
   const uri =
     url || //
-    viteEnv.VITE_API_URL || // support vitejs public env-vars
     process.env.NEXT_PUBLIC_API_URL || // support public nextjs env-vars
     process.env.API_URL ||
     '';
   const isSSL = uri.indexOf('https') === 0;
   const wsURI =
     wsURL ||
-    viteEnv.VITE_SUBSCRIPTIONS_URL || // support vitejs public env-vars
     process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || // support public nextjs env-vars
     process.env.SUBSCRIPTIONS_URL ||
     '';
