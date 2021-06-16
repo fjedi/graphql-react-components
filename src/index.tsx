@@ -85,7 +85,8 @@ export const DEFAULT_DEBOUNCE_TIMEOUT = 300;
 export function logger(message: string | Error, props = {}): void {
   const level = get(props, 'level', 'info');
   if (
-    process.env.NEXT_PUBLIC_RUNTIME_ENV !== 'production' &&
+    process.env.VITE_RUNTIME_ENV !== 'production' && // support vitejs public env-vars naming convention
+    process.env.NEXT_PUBLIC_RUNTIME_ENV !== 'production' && // support public nextjs env-vars
     process.env.RUNTIME_ENV !== 'production'
   ) {
     if (!message) {
@@ -183,7 +184,10 @@ export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Pro
 export function createClient(opts: ApolloClientOptions): ApolloClient {
   return new Client({
     name: 'web',
-    version: process.env.NEXT_PUBLIC_APP_VERSION || process.env.APP_VERSION,
+    version:
+      process.env.VITE_APP_VERSION || // support vitejs public env-vars naming convention
+      process.env.NEXT_PUBLIC_APP_VERSION || // support public nextjs env-vars
+      process.env.APP_VERSION,
     ...opts,
   });
 }
@@ -243,10 +247,19 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
   const { url, wsURL, middlewares } = params || {};
   const state: NormalizedCacheObject | undefined =
     typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
-  const uri = url || process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || '';
+  const uri =
+    url || //
+    process.env.VITE_API_URL || // support vitejs public env-vars naming convention
+    process.env.NEXT_PUBLIC_API_URL || // support public nextjs env-vars
+    process.env.API_URL ||
+    '';
   const isSSL = uri.indexOf('https') === 0;
   const wsURI =
-    wsURL || process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || process.env.SUBSCRIPTIONS_URL || '';
+    wsURL ||
+    process.env.VITE_SUBSCRIPTIONS_URL || // support vitejs public env-vars naming convention
+    process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || // support public nextjs env-vars
+    process.env.SUBSCRIPTIONS_URL ||
+    '';
   //
   const wsLink = new WebSocketLink({
     uri: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
@@ -508,16 +521,22 @@ export function getDataFromSubscriptionEvent(dataType: string) {
   };
 }
 
+export type UnsubscribeToMoreFn = () => void;
+
 const initialSubscriptionsSet: Map<
   Document,
-  { dataType: string; variables: unknown; unsubscribe: any }
+  { dataType: string; variables: unknown; unsubscribe: UnsubscribeToMoreFn }
 > = new Map([]);
 
 export type SubscribeToMoreProps = {
   subscriptionQueries: Document[];
-  variables: any;
+  variables: unknown;
   dataType: string;
-  subscribeToMore: (params: { document: Document; variables: any; updateQuery: any }) => void;
+  subscribeToMore: (params: {
+    document: Document;
+    variables: unknown;
+    updateQuery: any;
+  }) => UnsubscribeToMoreFn;
 };
 
 export function useSubscribeToMore(props: SubscribeToMoreProps): void {
@@ -615,7 +634,7 @@ export const Mutation = ({
         clearInterval(autoCommitter);
       }
     };
-  }, [autoCommitInterval]);
+  }, [mutate, autoCommitInterval]);
 
   return children(mutate, res);
 };

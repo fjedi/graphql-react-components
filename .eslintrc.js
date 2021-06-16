@@ -94,7 +94,7 @@ module.exports = {
     'max-classes-per-file': 0,
     'prefer-object-spread': 1,
     'operator-linebreak': 0, // Несовместимо с prettier
-    'implicit-arrow-linebreak': 1,
+    // 'implicit-arrow-linebreak': 1,
     'react-hooks/rules-of-hooks': 2,
     'react-hooks/exhaustive-deps': 1,
   },
