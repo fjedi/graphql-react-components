@@ -44,7 +44,13 @@ import {
 import ApolloCacheUpdater_ from 'apollo-cache-updater';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
-import { get, camelCase, isEqualWith, isEqual, uniq, pick, omit } from 'lodash';
+import get from 'lodash/get';
+import camelCase from 'lodash/camelCase';
+import isEqualWith from 'lodash/isEqualWith';
+import isEqual from 'lodash/isEqual';
+import uniq from 'lodash/uniq';
+import pick from 'lodash/pick';
+import omit from 'lodash/omit';
 import Modal from 'antd/lib/modal';
 import { DefaultError } from '@fjedi/errors';
 
