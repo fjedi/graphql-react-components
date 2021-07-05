@@ -51,7 +51,7 @@ import isEqual from 'lodash/isEqual';
 import uniq from 'lodash/uniq';
 import pick from 'lodash/pick';
 import omit from 'lodash/omit';
-import Modal from 'antd/lib/modal';
+import { Modal } from 'antd';
 import { DefaultError } from '@fjedi/errors';
 
 const ApolloCacheUpdater = ApolloCacheUpdater_;
