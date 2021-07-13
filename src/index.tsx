@@ -131,9 +131,9 @@ export function parseXHRHeaders(rawHeaders: string): Headers {
   // Replace instances of \r\n and \n followed by at least one space or horizontal tab with a space
   // https://tools.ietf.org/html/rfc7230#section-3.2
   const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
-  preProcessedHeaders.split(/\r?\n/).forEach((line: any) => {
+  preProcessedHeaders.split(/\r?\n/).forEach((line: string) => {
     const parts = line.split(':');
-    const key = parts.shift().trim();
+    const key = parts.shift()?.trim();
     if (key) {
       const value = parts.join(':').trim();
       headers.append(key, value);
@@ -436,6 +436,7 @@ export const Query = ({ pollInterval, ...props }: QueryComponentOptions): JSX.El
     errorPolicy="all"
     fetchPolicy="cache-and-network"
     pollInterval={typeof window !== 'undefined' ? pollInterval : 0}
+    // eslint-disable-next-line react/jsx-props-no-spreading
     {...props}
   />
 );
@@ -537,7 +538,7 @@ export type SubscribeToMoreProps = {
   subscribeToMore: (params: {
     document: Document;
     variables: unknown;
-    updateQuery: any;
+    updateQuery: unknown;
   }) => UnsubscribeToMoreFn;
 };
 
