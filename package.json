@@ -1,6 +1,6 @@
 {
   "name": "@fjedi/graphql-react-components",
-  "version": "5.0.4",
+  "version": "5.0.5",
   "description": "A set of helpers for managing apollo-graphql inside react-app",
   "main": "dist/index.js",
   "files": [
@@ -94,7 +94,7 @@
   },
   "peerDependencies": {
     "@types/lodash": "^4.14.164",
-    "antd": "^4.12.3 || ^4.15.1",
+    "antd": "^4.16.7",
     "i18next": "^19.8.4 || ^20.0.0",
     "lodash": "^4.17.20",
     "prop-types": "^15.7.2",
