@@ -556,6 +556,7 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
         !compareValues(variables, subscription.variables);
       if (variablesChanged) {
         logger('SubscriptionHandler.variablesChanged', {
+          subscriptionId,
           dataType,
           variables,
           oldVariables: subscription.variables,
@@ -570,7 +571,7 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
         if (subscriptions.has(document)) {
           return;
         }
-        logger('SubscriptionHandler.initSubscription', { dataType, variables });
+        logger('SubscriptionHandler.initSubscription', { subscriptionId, dataType, variables });
         subscriptions.set(document, {
           id: subscriptionId,
           dataType,
