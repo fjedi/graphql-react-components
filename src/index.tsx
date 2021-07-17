@@ -528,29 +528,32 @@ export type UnsubscribeToMoreFn = () => void;
 
 const initialSubscriptionsSet: Map<
   Document,
-  { dataType: string; variables: unknown; unsubscribe: UnsubscribeToMoreFn }
+  { id: string; dataType: string; variables: unknown; unsubscribe: UnsubscribeToMoreFn }
 > = new Map([]);
 
 export type SubscribeToMoreProps = {
+  subscriptionId: string;
   subscriptionQueries: Document[];
   variables: unknown;
   dataType: string;
   subscribeToMore: (params: {
     document: Document;
     variables: unknown;
-    updateQuery: unknown;
+    updateQuery: any;
   }) => UnsubscribeToMoreFn;
 };
 
 export function useSubscribeToMore(props: SubscribeToMoreProps): void {
-  const { subscriptionQueries, variables, dataType, subscribeToMore } = props;
+  const { subscriptionQueries, variables, dataType, subscribeToMore, subscriptionId } = props;
   const [subscriptions] = useState(initialSubscriptionsSet);
   const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), [dataType]);
   const subscribe = useCallback(() => {
     //
     subscriptions.forEach((subscription, document) => {
       const variablesChanged =
-        dataType === subscription.dataType && !compareValues(variables, subscription.variables);
+        (compareIds(subscription.id, subscriptionId) ||
+          (!subscriptionId && dataType === subscription.dataType)) &&
+        !compareValues(variables, subscription.variables);
       if (variablesChanged) {
         logger('SubscriptionHandler.variablesChanged', {
           dataType,
@@ -569,6 +572,7 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
         }
         logger('SubscriptionHandler.initSubscription', { dataType, variables });
         subscriptions.set(document, {
+          id: subscriptionId,
           dataType,
           variables,
           unsubscribe: subscribeToMore({
@@ -579,7 +583,15 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
         });
       });
     }
-  }, [subscriptions, updateQuery, subscriptionQueries, variables, dataType, subscribeToMore]);
+  }, [
+    subscriptionId,
+    subscriptions,
+    updateQuery,
+    subscriptionQueries,
+    variables,
+    dataType,
+    subscribeToMore,
+  ]);
   //
   useEffect(() => {
     subscribe();
