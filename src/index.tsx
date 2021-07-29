@@ -244,13 +244,14 @@ export type BrowserClientParams = {
   url?: string;
   wsURL?: string;
   middlewares?: BrowserClientMiddleware[];
+  initialState?: NormalizedCacheObject;
 };
 
 // Creates a new browser client
 export function browserClient(params?: BrowserClientParams): ApolloClient {
-  const { url, wsURL, middlewares } = params || {};
+  const { url, wsURL, middlewares, initialState } = params || {};
   const state: NormalizedCacheObject | undefined =
-    typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
+    initialState || typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
   const uri =
     url || //
     process.env.NEXT_PUBLIC_API_URL || // support public nextjs env-vars
