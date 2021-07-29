@@ -677,4 +677,8 @@ export {
 } from '@apollo/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 export { graphql, withApollo } from '@apollo/client/react/hoc';
-export { getDataFromTree } from '@apollo/client/react/ssr';
+export {
+  getDataFromTree,
+  getMarkupFromTree,
+  renderToStringWithData,
+} from '@apollo/client/react/ssr';
