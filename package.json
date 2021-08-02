@@ -60,7 +60,7 @@
     "@types/react": "17.0.15",
     "@typescript-eslint/eslint-plugin": "4.28.5",
     "@typescript-eslint/parser": "4.28.5",
-    "antd": "4.16.9",
+    "antd": "4.16.10",
     "babel-core": "6.26.3",
     "babel-runtime": "6.26.0",
     "eslint": "7.31.0",
