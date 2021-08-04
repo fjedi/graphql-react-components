@@ -670,6 +670,7 @@ export {
   useApolloClient,
   ApolloProvider,
   ApolloConsumer,
+  ApolloCache,
   InMemoryCache,
   InMemoryCacheConfig,
 } from '@apollo/client';
