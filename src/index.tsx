@@ -242,6 +242,7 @@ export type BrowserClientParams = {
   middlewares?: BrowserClientMiddleware[];
   initialState?: NormalizedCacheObject;
   cacheOptions?: InMemoryCacheConfig;
+  ssrForceFetchDelay?: number;
 };
 
 // Creates a new browser client
@@ -312,7 +313,6 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
     : new InMemoryCache(params?.cacheOptions);
   //
   return createClient({
-    // @ts-ignore
     cache,
     link: split(
       // split based on operation type
@@ -330,7 +330,7 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
         httpLink,
       ]),
     ),
-    ssrForceFetchDelay: 100,
+    ssrForceFetchDelay: params?.ssrForceFetchDelay,
   });
 }
 
