@@ -16,7 +16,7 @@ import {
   NormalizedCacheObject,
   Operation,
 } from '@apollo/client/core';
-import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
+// import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
 import DebounceLink from 'apollo-link-debounce';
 import { getMainDefinition } from 'apollo-utilities';
 // eslint-disable-next-line import/no-extraneous-dependencies
