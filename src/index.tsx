@@ -11,10 +11,10 @@ import {
   from as mergeLinks,
   split,
   ApolloClientOptions as ClientOptions,
+  InMemoryCache,
   NormalizedCacheObject,
   Operation,
 } from '@apollo/client/core';
-import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
 import DebounceLink from 'apollo-link-debounce';
 import { getMainDefinition } from 'apollo-utilities';
