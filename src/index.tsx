@@ -71,7 +71,7 @@ export type DataRowPaginatedList = {
 export type ApolloState = { [k: string]: unknown };
 
 export type ApolloClientOptions = ClientOptions<TodoAny> & {
-  cache?: InMemoryCacheConfig;
+  cacheOptions?: InMemoryCacheConfig;
 };
 
 export type ApolloClient = Client<TodoAny>;
@@ -218,7 +218,7 @@ export function serverClient<TContext>(ctx: TContext, o: ApolloClientOptions): A
   // const persistedQueryLink = createPersistedQueryLink({
   //   // useGETForHashedQueries: true,
   // });
-  const cache = new InMemoryCache(o.cache);
+  const cache = new InMemoryCache(o.cacheOptions);
   //
   return createClient({
     ssrMode: true,
@@ -241,7 +241,7 @@ export type BrowserClientParams = {
   wsURL?: string;
   middlewares?: BrowserClientMiddleware[];
   initialState?: NormalizedCacheObject;
-  cache?: InMemoryCacheConfig;
+  cacheOptions?: InMemoryCacheConfig;
 };
 
 // Creates a new browser client
@@ -308,8 +308,8 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
   // });
   //
   const cache = state
-    ? new InMemoryCache(params?.cache).restore(state)
-    : new InMemoryCache(params?.cache);
+    ? new InMemoryCache(params?.cacheOptions).restore(state)
+    : new InMemoryCache(params?.cacheOptions);
   //
   return createClient({
     // @ts-ignore
