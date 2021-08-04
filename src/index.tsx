@@ -12,6 +12,7 @@ import {
   split,
   ApolloClientOptions as ClientOptions,
   InMemoryCache,
+  InMemoryCacheConfig,
   NormalizedCacheObject,
   Operation,
 } from '@apollo/client/core';
@@ -25,8 +26,6 @@ import { WebSocketLink } from '@apollo/client/link/ws';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { onError as onApolloError } from '@apollo/client/link/error';
 import { createUploadLink } from 'apollo-upload-client';
-// @ts-ignore
-import { ProgressiveFragmentMatcher } from 'apollo-progressive-fragment-matcher/lib/fragmentMatcher';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
 import {
@@ -71,13 +70,11 @@ export type DataRowPaginatedList = {
 
 export type ApolloState = { [k: string]: unknown };
 
-export type ApolloClientOptions = ClientOptions<TodoAny>;
+export type ApolloClientOptions = ClientOptions<TodoAny> & {
+  cache?: InMemoryCacheConfig;
+};
 
 export type ApolloClient = Client<TodoAny>;
-
-export const fragmentMatcher = new ProgressiveFragmentMatcher({
-  strategy: 'extension',
-});
 
 export type ApolloUploadFetchOptions = RequestInit & {
   method: string;
@@ -218,20 +215,19 @@ export function serverClient<TContext>(ctx: TContext, o: ApolloClientOptions): A
     credentials: 'include',
     headers,
   });
-  const persistedQueryLink = createPersistedQueryLink({
-    // useGETForHashedQueries: true,
-  });
-  const cache = new InMemoryCache({ fragmentMatcher });
+  // const persistedQueryLink = createPersistedQueryLink({
+  //   // useGETForHashedQueries: true,
+  // });
+  const cache = new InMemoryCache(o.cache);
   //
   return createClient({
     ssrMode: true,
     // @ts-ignore
     cache,
     link: mergeLinks([
-      fragmentMatcher.link(),
       errorLink,
       //
-      persistedQueryLink,
+      // persistedQueryLink,
       httpLink,
     ]),
     ...omit(o, ['cache', 'ssrMode']),
@@ -245,6 +241,7 @@ export type BrowserClientParams = {
   wsURL?: string;
   middlewares?: BrowserClientMiddleware[];
   initialState?: NormalizedCacheObject;
+  cache?: InMemoryCacheConfig;
 };
 
 // Creates a new browser client
@@ -306,13 +303,13 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
       return fetch(u, options);
     },
   });
-  const persistedQueryLink = createPersistedQueryLink({
-    // useGETForHashedQueries: true,
-  });
+  // const persistedQueryLink = createPersistedQueryLink({
+  //   // useGETForHashedQueries: true,
+  // });
   //
   const cache = state
-    ? new InMemoryCache({ fragmentMatcher }).restore(state)
-    : new InMemoryCache({ fragmentMatcher });
+    ? new InMemoryCache(params?.cache).restore(state)
+    : new InMemoryCache(params?.cache);
   //
   return createClient({
     // @ts-ignore
@@ -326,11 +323,10 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
       wsLink,
       mergeLinks([
         metadataLink,
-        fragmentMatcher.link(),
         new DebounceLink(DEFAULT_DEBOUNCE_TIMEOUT),
         errorLink,
         //
-        persistedQueryLink,
+        // persistedQueryLink,
         httpLink,
       ]),
     ),
@@ -675,6 +671,7 @@ export {
   ApolloProvider,
   ApolloConsumer,
   InMemoryCache,
+  InMemoryCacheConfig,
 } from '@apollo/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 export { graphql, withApollo } from '@apollo/client/react/hoc';
