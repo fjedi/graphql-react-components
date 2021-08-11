@@ -399,10 +399,10 @@ export function updateAfterMutation(dataType: string, listFieldName?: string) {
               if (rows.some((r: CachedObjectRef) => compareIds(r.__ref, cacheId))) {
                 return cachedData;
               }
-              return Object.assign(cachedData, {
+              return {
                 count: count + 1,
                 rows: [toReference(cacheId)].concat(rows),
-              });
+              };
             }
             if (removedRow) {
               if (Array.isArray(cachedData)) {
@@ -410,11 +410,11 @@ export function updateAfterMutation(dataType: string, listFieldName?: string) {
                 return cachedData.filter((r) => !compareIds(r.__ref, cacheId));
               }
               const { rows, count } = cachedData;
-              return Object.assign(cachedData, {
+              return {
                 count: count - 1,
                 // eslint-disable-next-line no-underscore-dangle
                 rows: rows.filter((r: CachedObjectRef) => !compareIds(r.__ref, cacheId)),
-              });
+              };
             }
             //
             return cachedData;
