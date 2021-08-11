@@ -367,7 +367,7 @@ export function compareValues(a: unknown, b: unknown): boolean {
 
 export type CachedObjectRef = { __ref: string };
 
-export function updateAfterMutation(dataType: string, listFieldName: string) {
+export function updateAfterMutation(dataType: string, listFieldName?: string) {
   return (cache: ApolloCache<unknown>, { data }: FetchResult): void => {
     const createdRow = get(data, `create${dataType}`) as DataRow | DataRow[];
     const removedRow = get(data, `remove${dataType}`) as DataRow | DataRow[];
