@@ -11,6 +11,7 @@ import {
   from as mergeLinks,
   split,
   ApolloClientOptions as ClientOptions,
+  ApolloCache,
   InMemoryCache,
   InMemoryCacheConfig,
   NormalizedCacheObject,
@@ -39,8 +40,6 @@ import {
   MutationFunctionOptions,
   QueryResult,
 } from '@apollo/client';
-// @ts-ignore
-import ApolloCacheUpdater_ from 'apollo-cache-updater';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import get from 'lodash/get';
@@ -52,8 +51,6 @@ import pick from 'lodash/pick';
 import omit from 'lodash/omit';
 import { Modal } from 'antd';
 import { DefaultError } from '@fjedi/errors';
-
-const ApolloCacheUpdater = ApolloCacheUpdater_;
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -368,8 +365,10 @@ export function compareValues(a: unknown, b: unknown): boolean {
   );
 }
 
-export function updateAfterMutation(query: DocumentNode, dataType: string) {
-  return (proxy: unknown, { data }: MutationResult): void => {
+export type CachedObjectRef = { __ref: string };
+
+export function updateAfterMutation(dataType: string, listFieldName: string) {
+  return (cache: ApolloCache<unknown>, { data }: FetchResult): void => {
     const createdRow = get(data, `create${dataType}`) as DataRow | DataRow[];
     const removedRow = get(data, `remove${dataType}`) as DataRow | DataRow[];
     //
@@ -378,49 +377,49 @@ export function updateAfterMutation(query: DocumentNode, dataType: string) {
       return;
     }
     (Array.isArray(mutationResult) ? mutationResult : [mutationResult]).forEach((row) => {
+      const cacheId = cache.identify(row);
+      if (!cacheId) {
+        return;
+      }
       //
-      ApolloCacheUpdater({
-        proxy, // mandatory
-        operation: createdRow
-          ? {
-              type: 'ADD',
-              add: (d: MutationResult) => {
-                const result = get(d, 'data');
-                if (Array.isArray(result)) {
-                  if (result.some((r: DataRow) => r.id === row.id)) {
-                    return result;
-                  }
-                  return Object.assign([row].concat(result));
+      cache.modify({
+        fields: {
+          [listFieldName || getListKeyFromDataType(dataType)](cachedData, { toReference }) {
+            if (createdRow) {
+              if (Array.isArray(cachedData)) {
+                // eslint-disable-next-line no-underscore-dangle
+                if (cachedData.some((r) => compareIds(r.__ref, cacheId))) {
+                  return cachedData;
                 }
-                //
-                const { rows, count } = result;
-                if (rows.some((r: DataRow) => r.id === row.id)) {
-                  return result;
-                }
-                return Object.assign(result, {
-                  count: count + 1,
-                  rows: [row].concat(rows),
-                });
-              },
+                return [toReference(cacheId)].concat(cachedData);
+              }
+              //
+              const { rows, count } = cachedData;
+              // eslint-disable-next-line no-underscore-dangle
+              if (rows.some((r: CachedObjectRef) => compareIds(r.__ref, cacheId))) {
+                return cachedData;
+              }
+              return Object.assign(cachedData, {
+                count: count + 1,
+                rows: [toReference(cacheId)].concat(rows),
+              });
             }
-          : {
-              type: 'REMOVE',
-              remove: (d: MutationResult) => {
-                const result = get(d, 'data');
-                if (Array.isArray(result)) {
-                  return result.filter((r: DataRow) => !compareIds(r.id, row.id));
-                }
-                const { rows, count } = result;
-                return Object.assign(result, {
-                  count: count - 1,
-                  rows: rows.filter((r: DataRow) => !compareIds(r.id, row.id)),
-                });
-              },
-            },
-        queriesToUpdate: [query],
-        searchOperator: 'ANY',
-        searchVariables: {},
-        mutationResult: row,
+            if (removedRow) {
+              if (Array.isArray(cachedData)) {
+                // eslint-disable-next-line no-underscore-dangle
+                return cachedData.filter((r) => !compareIds(r.__ref, cacheId));
+              }
+              const { rows, count } = cachedData;
+              return Object.assign(cachedData, {
+                count: count - 1,
+                // eslint-disable-next-line no-underscore-dangle
+                rows: rows.filter((r: CachedObjectRef) => !compareIds(r.__ref, cacheId)),
+              });
+            }
+            //
+            return cachedData;
+          },
+        },
       });
     });
   };
