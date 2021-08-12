@@ -646,7 +646,7 @@ export function useMutation<
   options: MutationHookOptions<TData, TVariables, TContext> & { autoCommitInterval?: number },
 ): MutationTuple<TData, TVariables, TContext, TCache> {
   const { t } = useTranslation();
-  const { autoCommitInterval } = options;
+  const { autoCommitInterval } = options || {};
   //
   const mutationTuple = ApolloUseMutation(mutation, {
     onError(error) {
