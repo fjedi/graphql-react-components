@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
-import fetch from 'cross-fetch';
+import 'cross-fetch/polyfill';
 import { DocumentNode, OperationDefinitionNode } from 'graphql';
 // Apollo client library
 // eslint-disable-next-line import/no-extraneous-dependencies
