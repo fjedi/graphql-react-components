@@ -659,7 +659,6 @@ export function useMutation<
     onCompleted(res) {
       logger('useMutation.onCompleted', res);
     },
-    errorPolicy: 'all',
     ...(options || {}),
   });
   //
