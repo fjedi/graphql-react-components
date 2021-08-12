@@ -649,7 +649,13 @@ export function useMutation<
   const { autoCommitInterval } = options;
   //
   const mutationTuple = ApolloUseMutation(mutation, {
-    onError: onError({ t }),
+    onError(error) {
+      logger('useMutation.onError', error);
+      Modal.error({
+        title: t('Error'),
+        content: error.message.replace('GraphQL error:', ' ').trim(),
+      });
+    },
     onCompleted(res) {
       logger('useMutation.onCompleted', res);
     },
