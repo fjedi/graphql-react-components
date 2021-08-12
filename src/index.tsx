@@ -16,7 +16,11 @@ import {
   InMemoryCacheConfig,
   NormalizedCacheObject,
   Operation,
+  DefaultContext,
+  OperationVariables,
+  TypedDocumentNode,
 } from '@apollo/client/core';
+import { MutationHookOptions } from '@apollo/client/react';
 // import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
 import DebounceLink from 'apollo-link-debounce';
 import { getMainDefinition } from 'apollo-utilities';
@@ -31,7 +35,7 @@ import { createUploadLink } from 'apollo-upload-client';
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
 import {
   QueryHookOptions,
-  useMutation,
+  useMutation as ApolloUseMutation,
   useQuery as ApolloUseQuery,
   OnSubscriptionDataOptions,
   ApolloError,
@@ -39,6 +43,7 @@ import {
   MutationResult,
   MutationFunctionOptions,
   QueryResult,
+  MutationTuple,
 } from '@apollo/client';
 import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
@@ -621,18 +626,38 @@ export type MutationProps = {
   mutation: DocumentNode;
 };
 
-export const Mutation = ({
-  children,
-  autoCommitInterval,
-  mutation,
-  ...props
-}: MutationProps): void => {
-  const { t } = useTranslation();
-  //
-  const [mutate, res] = useMutation(mutation, {
-    onError: onError({ t }),
-    ...props,
+export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryResult {
+  return ApolloUseQuery(query, {
+    partialRefetch: true,
+    returnPartialData: true,
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
+    ...(options || {}),
   });
+}
+
+export function useMutation<
+  TData = TodoAny,
+  TVariables = OperationVariables,
+  TContext = DefaultContext,
+  TCache extends ApolloCache<TodoAny> = ApolloCache<TodoAny>,
+>(
+  mutation: DocumentNode | TypedDocumentNode<TData, TVariables>,
+  options: MutationHookOptions<TData, TVariables, TContext> & { autoCommitInterval?: number },
+): MutationTuple<TData, TVariables, TContext, TCache> {
+  const { t } = useTranslation();
+  const { autoCommitInterval } = options;
+  //
+  const mutationTuple = ApolloUseMutation(mutation, {
+    onError: onError({ t }),
+    onCompleted(res) {
+      logger('useMutation.onCompleted', res);
+    },
+    errorPolicy: 'all',
+    ...(options || {}),
+  });
+  //
+  const [mutate] = mutationTuple;
   //
   useEffect(() => {
     const autoCommitter =
@@ -647,24 +672,21 @@ export const Mutation = ({
       }
     };
   }, [mutate, autoCommitInterval]);
+  //
+  return mutationTuple;
+}
+
+export const Mutation = ({ children, mutation, ...props }: MutationProps): void => {
+  //
+  const [mutate, res] = useMutation(mutation, props);
 
   return children(mutate, res);
 };
 
-export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryResult {
-  return ApolloUseQuery(query, {
-    partialRefetch: true,
-    returnPartialData: true,
-    errorPolicy: 'all',
-    fetchPolicy: 'cache-and-network',
-    ...(options || {}),
-  });
-}
 // eslint-disable-next-line import/no-extraneous-dependencies
 export { MockedProvider } from '@apollo/client/testing';
 export {
   useLazyQuery,
-  useMutation,
   useSubscription,
   useApolloClient,
   ApolloProvider,
