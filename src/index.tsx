@@ -1,4 +1,5 @@
-//
+// Ponyfill for isomorphic 'fetch'
+import fetch from 'cross-fetch';
 import * as React from 'react';
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
