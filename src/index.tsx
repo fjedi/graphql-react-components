@@ -21,7 +21,8 @@ import {
   TypedDocumentNode,
 } from '@apollo/client/core';
 import { MutationHookOptions } from '@apollo/client/react';
-// import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
+import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
+import { sha256 } from 'crypto-hash';
 import DebounceLink from 'apollo-link-debounce';
 import { getMainDefinition } from 'apollo-utilities';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -217,21 +218,16 @@ export function serverClient<TContext>(ctx: TContext, o: ApolloClientOptions): A
     credentials: 'include',
     headers,
   });
-  // const persistedQueryLink = createPersistedQueryLink({
-  //   // useGETForHashedQueries: true,
-  // });
+  const persistedQueryLink = createPersistedQueryLink({
+    useGETForHashedQueries: true,
+    sha256,
+  });
   const cache = new InMemoryCache(o.cacheOptions);
   //
   return createClient({
     ssrMode: true,
-    // @ts-ignore
     cache,
-    link: mergeLinks([
-      errorLink,
-      //
-      // persistedQueryLink,
-      httpLink,
-    ]),
+    link: mergeLinks([errorLink, persistedQueryLink, httpLink]),
     ...omit(o, ['cache', 'ssrMode']),
   });
 }
@@ -306,9 +302,10 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
       return fetch(u, options);
     },
   });
-  // const persistedQueryLink = createPersistedQueryLink({
-  //   // useGETForHashedQueries: true,
-  // });
+  const persistedQueryLink = createPersistedQueryLink({
+    useGETForHashedQueries: true,
+    sha256,
+  });
   //
   const cache = state
     ? new InMemoryCache(params?.cacheOptions).restore(state)
@@ -327,8 +324,7 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
         metadataLink,
         new DebounceLink(DEFAULT_DEBOUNCE_TIMEOUT),
         errorLink,
-        //
-        // persistedQueryLink,
+        persistedQueryLink,
         httpLink,
       ]),
     ),
