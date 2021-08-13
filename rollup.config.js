@@ -21,7 +21,7 @@ export default {
     // Preferably set as first plugin.
     peerDepsExternal(),
     //
-    nodeResolve(),
+    nodeResolve({ browser: true }),
     commonjs({
       // namedExports: {
       //   'node_modules/subscriptions-transport-ws/dist/index.js': ['SubscriptionClient'],
