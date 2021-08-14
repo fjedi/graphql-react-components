@@ -145,6 +145,7 @@ export function parseXHRHeaders(rawHeaders: string): Headers {
 
 export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Promise<Response> =>
   new Promise((resolve, reject) => {
+    const logMessagePrefix = '[graphQL.uploadFetch] ';
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = options.credentials !== 'omit';
     xhr.onload = () => {
@@ -160,13 +161,18 @@ export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Pro
       };
       opts.url = 'responseURL' in xhr ? xhr.responseURL : opts.headers.get('X-Request-URL');
       const body = 'response' in xhr ? xhr.response : (xhr as XMLHttpRequest).responseText;
+      logger(`${logMessagePrefix}File successfully uploaded`, { body, opts });
       resolve(new Response(body, opts));
     };
-    xhr.onerror = () => {
-      reject(new TypeError('Network request failed'));
+    xhr.onerror = (e) => {
+      const m = `${logMessagePrefix}Network request failed`;
+      logger(m, e);
+      reject(new Error(m));
     };
-    xhr.ontimeout = () => {
-      reject(new TypeError('Network request failed'));
+    xhr.ontimeout = (e) => {
+      const m = `${logMessagePrefix}Upload request timed out`;
+      logger(m, e);
+      reject(new Error(m));
     };
     xhr.open(options.method, url, true);
 
