@@ -331,8 +331,15 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
         metadataLink,
         new DebounceLink(DEFAULT_DEBOUNCE_TIMEOUT),
         errorLink,
-        persistedQueryLink,
-        httpLink,
+        split(
+          // Do not use persistedQueryLink for mutations
+          ({ query }) => {
+            const { operation } = getMainDefinition(query) as OperationDefinitionNode;
+            return operation === 'mutation';
+          },
+          httpLink,
+          mergeLinks([persistedQueryLink, httpLink]),
+        ),
       ]),
     ),
     ssrForceFetchDelay: params?.ssrForceFetchDelay,
