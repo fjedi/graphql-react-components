@@ -188,7 +188,7 @@ export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Pro
       xhr.abort();
     });
 
-    xhr.send(options.body);
+    xhr.send(options.body as TodoAny);
   });
 
 // Helper function to create a new Apollo client, by merging in

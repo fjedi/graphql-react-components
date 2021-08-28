@@ -9,11 +9,17 @@ module.exports = {
     'security',
   ],
   extends: [
+    'airbnb-base',
     'airbnb-typescript/base',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
     'prettier',
   ],
+  settings: {
+    react: {
+      version: '17',
+    },
+  },
   env: {
     es6: true,
     browser: true,
