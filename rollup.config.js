@@ -32,7 +32,7 @@ export default [
     output: [
       {
         file: pkg.browser,
-        format: 'iife',
+        format: 'es',
         ...commonOutputOptions,
       },
     ],
