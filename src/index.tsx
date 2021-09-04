@@ -717,3 +717,5 @@ export {
   getMarkupFromTree,
   renderToStringWithData,
 } from '@apollo/client/react/ssr';
+
+export { DocumentNode, OperationDefinitionNode } from 'graphql';
