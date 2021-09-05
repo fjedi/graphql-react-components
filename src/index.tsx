@@ -354,8 +354,8 @@ export function getListKeyFromDataType(
   dataType: string,
   options?: GetListKeyFromDataTypeOptions,
 ): string {
-  const { suffix } = options ?? {};
-  return `get${dataType.replace(/s$/, 'se').replace(/y$/, 'ie')}s`;
+  const { suffix = '' } = options ?? {};
+  return `get${dataType.replace(/s$/, 'se').replace(/y$/, 'ie')}s${suffix}`;
 }
 
 //
