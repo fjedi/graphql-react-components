@@ -346,7 +346,15 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
   });
 }
 
-export function getListKeyFromDataType(dataType: string): string {
+export type GetListKeyFromDataTypeOptions = {
+  suffix?: string;
+};
+
+export function getListKeyFromDataType(
+  dataType: string,
+  options?: GetListKeyFromDataTypeOptions,
+): string {
+  const { suffix } = options ?? {};
   return `get${dataType.replace(/s$/, 'se').replace(/y$/, 'ie')}s`;
 }
 
@@ -459,8 +467,10 @@ export function getDataFromResponse(dataType: string) {
   return (data: QueryResult): DataRowPaginatedList => {
     if (data) {
       return (
-        data[`get${dataType}List`] ||
-        data[getListKeyFromDataType(dataType)] || { rows: [], count: 0 }
+        data[getListKeyFromDataType(dataType, { suffix: 'V2' })] || // try to find latest version of the query (with 'V2' on the query-name end)
+        data[getListKeyFromDataType(dataType)] || // try to find query with 'ies' or 'es' on the end of the name
+        // try to find query with common 'List' suffix or fall-back to the object with empty rows-array and zero count
+        data[`get${dataType}List`] || { rows: [], count: 0 }
       );
     }
     return {
