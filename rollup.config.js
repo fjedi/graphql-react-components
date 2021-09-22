@@ -68,6 +68,13 @@ export default [
         ...commonOutputOptions,
       },
     ],
-    plugins: [...commonPluginsHead, nodeResolve({ browser: false }), ...commonPluginsMiddle],
+    plugins: [
+      ...commonPluginsHead,
+      nodeResolve({ browser: false }),
+      ...commonPluginsMiddle,
+      terser({
+        ecma: 2015,
+      }),
+    ],
   },
 ];
