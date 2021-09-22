@@ -72,9 +72,9 @@ export default [
     ],
     plugins: [
       ...commonPluginsHead,
-      nodePolyfills(/* options */),
       nodeResolve({ browser: false }),
       ...commonPluginsMiddle,
+      nodePolyfills(),
     ],
   },
 ];
