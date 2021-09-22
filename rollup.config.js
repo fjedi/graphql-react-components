@@ -70,7 +70,7 @@ export default [
     ],
     plugins: [
       ...commonPluginsHead,
-      nodeResolve({ browser: false }),
+      nodeResolve({ browser: false, exportConditions: ['node'] }),
       ...commonPluginsMiddle,
       // terser({
       //   ecma: 2015,
