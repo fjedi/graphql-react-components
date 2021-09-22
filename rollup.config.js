@@ -82,9 +82,9 @@ export default [
       ...commonPluginsHead,
       nodeResolve({ browser: false }),
       ...commonPluginsMiddle,
-      terser({
-        ecma: 2015,
-      }),
+      // terser({
+      //   ecma: 2015,
+      // }),
     ],
   },
 ];
