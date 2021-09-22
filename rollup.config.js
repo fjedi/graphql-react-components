@@ -27,11 +27,12 @@ const commonPluginsMiddle = [
 
 // continued
 export default [
+  // browser/web bundle
   {
     input,
     output: [
       {
-        file: pkg.browser,
+        file: `${pkg.browser}.mjs`,
         format: 'es',
         ...commonOutputOptions,
       },
@@ -45,11 +46,24 @@ export default [
       }),
     ],
   },
+  // nodejs/server-side bundle
   {
     input,
     output: [
       {
         file: pkg.main,
+        format: 'cjs',
+        ...commonOutputOptions,
+      },
+    ],
+    plugins: [...commonPluginsHead, nodeResolve({ browser: false }), ...commonPluginsMiddle],
+  },
+  // react-native bundle
+  {
+    input,
+    output: [
+      {
+        file: `${pkg.browser}.native.js`,
         format: 'umd',
         name: 'grc',
         ...commonOutputOptions,
