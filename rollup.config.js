@@ -1,6 +1,5 @@
 import typescript from 'rollup-plugin-typescript2';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import nodePolyfills from 'rollup-plugin-polyfill-node';
 import commonjs from '@rollup/plugin-commonjs';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import { terser } from 'rollup-plugin-terser';
@@ -70,11 +69,6 @@ export default [
         ...commonOutputOptions,
       },
     ],
-    plugins: [
-      ...commonPluginsHead,
-      nodeResolve({ browser: false }),
-      ...commonPluginsMiddle,
-      nodePolyfills(),
-    ],
+    plugins: [...commonPluginsHead, nodeResolve({ browser: false }), ...commonPluginsMiddle],
   },
 ];
