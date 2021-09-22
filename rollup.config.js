@@ -64,7 +64,17 @@ export default [
     output: [
       {
         file: `${pkg.browser}.native.js`,
-        format: 'cjs',
+        format: 'umd',
+        name: 'grc',
+        globals: {
+          path: 'path',
+          url: 'url',
+          stream: 'stream',
+          crypto: 'crypto',
+          http: 'http',
+          https: 'https',
+          zlib: 'zlib',
+        },
         ...commonOutputOptions,
       },
     ],
