@@ -64,8 +64,7 @@ export default [
     output: [
       {
         file: `${pkg.browser}.native.js`,
-        format: 'umd',
-        name: 'grc',
+        format: 'cjs',
         ...commonOutputOptions,
       },
     ],
