@@ -3,7 +3,6 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import { terser } from 'rollup-plugin-terser';
-import externalGlobals from 'rollup-plugin-external-globals';
 //
 import pkg from './package.json';
 
@@ -76,16 +75,6 @@ export default [
       // terser({
       //   ecma: 2015,
       // }),
-      // These modules must be provided by RN app (with "node-libs-react-native" or smth similar)
-      externalGlobals({
-        path: 'path',
-        url: 'url',
-        stream: 'stream',
-        crypto: 'crypto',
-        http: 'http',
-        https: 'https',
-        zlib: 'zlib',
-      }),
     ],
   },
 ];
