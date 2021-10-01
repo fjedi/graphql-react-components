@@ -54,7 +54,7 @@
     "graphql": "15.6.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "20.0.0",
+    "@rollup/plugin-commonjs": "21.0.0",
     "@rollup/plugin-node-resolve": "13.0.5",
     "@types/jest": "27.0.1",
     "@types/lodash": "4.14.175",
