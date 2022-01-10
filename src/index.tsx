@@ -727,5 +727,17 @@ export {
   getMarkupFromTree,
   renderToStringWithData,
 } from '@apollo/client/react/ssr';
+export { createHttpLink } from '@apollo/client/link/http';
+export {
+  ApolloLink,
+  from as mergeLinks,
+  split,
+  ApolloClientOptions as ClientOptions,
+  NormalizedCacheObject,
+  Operation,
+  DefaultContext,
+  OperationVariables,
+  TypedDocumentNode,
+} from '@apollo/client/core';
 
 export { DocumentNode, OperationDefinitionNode } from 'graphql';
