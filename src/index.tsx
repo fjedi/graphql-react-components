@@ -248,11 +248,12 @@ export type BrowserClientParams = {
   initialState?: NormalizedCacheObject;
   cacheOptions?: InMemoryCacheConfig;
   ssrForceFetchDelay?: number;
+  usePersistedQueries?: boolean;
 };
 
 // Creates a new browser client
 export function browserClient(params?: BrowserClientParams): ApolloClient {
-  const { url, wsURL, middlewares, initialState } = params || {};
+  const { url, wsURL, middlewares, initialState, usePersistedQueries = true } = params || {};
   const state: NormalizedCacheObject | undefined =
     initialState || typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
   const uri =
@@ -267,15 +268,17 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
     process.env.SUBSCRIPTIONS_URL ||
     '';
   //
-  const wsLink = new WebSocketLink({
-    uri: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
-    options: {
-      reconnect: true,
-      connectionParams: {
-        // token: 'get token from the cookies?',
-      },
-    },
-  });
+  const wsLink = wsURI
+    ? new WebSocketLink({
+        uri: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
+        options: {
+          reconnect: true,
+          connectionParams: {
+            // token: 'get token from the cookies?',
+          },
+        },
+      })
+    : null;
   //
   const metadataLink = new ApolloLink((operation, forward) => {
     //
@@ -309,14 +312,41 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
       return fetch(u, options);
     },
   });
-  const persistedQueryLink = createPersistedQueryLink({
-    useGETForHashedQueries: true,
-    sha256,
-  });
+  const persistedQueryLink = usePersistedQueries
+    ? createPersistedQueryLink({
+        useGETForHashedQueries: true,
+        sha256,
+      })
+    : null;
   //
   const cache = state
     ? new InMemoryCache(params?.cacheOptions).restore(state)
     : new InMemoryCache(params?.cacheOptions);
+
+  const httpLinks = mergeLinks([
+    metadataLink,
+    new DebounceLink(DEFAULT_DEBOUNCE_TIMEOUT),
+    errorLink,
+    persistedQueryLink
+      ? split(
+          // Do not use persistedQueryLink for mutations
+          ({ query }) => {
+            const { operation } = getMainDefinition(query) as OperationDefinitionNode;
+            return operation === 'mutation';
+          },
+          httpLink,
+          mergeLinks([persistedQueryLink, httpLink]),
+        )
+      : httpLink,
+  ]);
+
+  if (!wsLink) {
+    return createClient({
+      cache,
+      link: httpLinks,
+      ssrForceFetchDelay: params?.ssrForceFetchDelay,
+    });
+  }
   //
   return createClient({
     cache,
@@ -327,20 +357,7 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
         return kind === 'OperationDefinition' && operation === 'subscription';
       },
       wsLink,
-      mergeLinks([
-        metadataLink,
-        new DebounceLink(DEFAULT_DEBOUNCE_TIMEOUT),
-        errorLink,
-        split(
-          // Do not use persistedQueryLink for mutations
-          ({ query }) => {
-            const { operation } = getMainDefinition(query) as OperationDefinitionNode;
-            return operation === 'mutation';
-          },
-          httpLink,
-          mergeLinks([persistedQueryLink, httpLink]),
-        ),
-      ]),
+      httpLinks,
     ),
     ssrForceFetchDelay: params?.ssrForceFetchDelay,
   });
