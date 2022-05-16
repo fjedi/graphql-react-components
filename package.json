@@ -59,7 +59,7 @@
     "@types/jest": "27.0.3",
     "@types/lodash": "4.14.175",
     "@types/node": "16.11.21",
-    "@types/react": "17.0.37",
+    "@types/react": "17.0.45",
     "@typescript-eslint/eslint-plugin": "5.7.0",
     "@typescript-eslint/parser": "5.7.0",
     "antd": "4.18.5",
