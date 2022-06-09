@@ -1,6 +1,6 @@
 {
   "name": "@fjedi/graphql-react-components",
-  "version": "9.0.1",
+  "version": "9.0.2",
   "description": "A set of helpers for managing apollo-graphql inside react-app",
   "browser": "dist/browser",
   "main": "dist/index.js",
@@ -59,7 +59,7 @@
     "@types/jest": "28.1.1",
     "@types/lodash": "4.14.182",
     "@types/node": "17.0.41",
-    "@types/react": "18.0.12",
+    "@types/react": "17.0.45",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",
     "antd": "4.21.0",
