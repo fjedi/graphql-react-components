@@ -362,6 +362,8 @@ export {
 export { DocumentNode, OperationDefinitionNode } from 'graphql';
 export { compareIds, compareValues } from './helpers';
 export {
+  useQuery,
+  useMutation,
   useApolloError,
   useSubscribeToMore,
   SubscribeToMoreProps,
