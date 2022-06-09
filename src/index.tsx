@@ -1,9 +1,8 @@
 // Ponyfill for isomorphic 'fetch'
 import fetch from 'cross-fetch';
 import * as React from 'react';
-import { useState, useCallback, useMemo, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
-import { DocumentNode, OperationDefinitionNode } from 'graphql';
+import { OperationDefinitionNode, print } from 'graphql';
 // Apollo client library
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
@@ -12,67 +11,39 @@ import {
   from as mergeLinks,
   split,
   ApolloClientOptions as ClientOptions,
-  ApolloCache,
   InMemoryCache,
   InMemoryCacheConfig,
   NormalizedCacheObject,
   Operation,
-  DefaultContext,
-  OperationVariables,
-  TypedDocumentNode,
+  Observable,
+  FetchResult,
 } from '@apollo/client/core';
-import { MutationHookOptions } from '@apollo/client/react';
 import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
 import { sha256 } from 'crypto-hash';
 import DebounceLink from 'apollo-link-debounce';
-import { getMainDefinition } from 'apollo-utilities';
+import { getMainDefinition } from '@apollo/client/utilities';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { createHttpLink } from '@apollo/client/link/http';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { WebSocketLink } from '@apollo/client/link/ws';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { onError as onApolloError } from '@apollo/client/link/error';
 import { createUploadLink } from 'apollo-upload-client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
 import {
-  QueryHookOptions,
-  useMutation as ApolloUseMutation,
-  useQuery as ApolloUseQuery,
-  OnSubscriptionDataOptions,
-  ApolloError,
-  FetchResult,
-  MutationResult,
-  MutationFunctionOptions,
-  QueryResult,
-  MutationTuple,
-} from '@apollo/client';
-import { TFunction } from 'i18next';
-import { useTranslation } from 'react-i18next';
+  createClient as createWsClient,
+  ClientOptions as WsClientOptions,
+  Client as WsClient,
+} from 'graphql-ws';
 import get from 'lodash/get';
-import camelCase from 'lodash/camelCase';
-import isEqualWith from 'lodash/isEqualWith';
-import isEqual from 'lodash/isEqual';
-import uniq from 'lodash/uniq';
 import pick from 'lodash/pick';
 import omit from 'lodash/omit';
-import { Modal } from 'antd';
-import { DefaultError } from '@fjedi/errors';
+import graphQLLogger from './logger';
+import { useMutation, MutationProps } from './hooks';
+import { DefaultError } from './errors';
 
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TodoAny = any;
-
-export type DataRow = {
-  id: string;
-};
-
-export type DataRowPaginatedList = {
-  rows: DataRow[];
-  count: number;
-};
-
-export type ApolloState = { [k: string]: unknown };
 
 export type ApolloClientOptions = ClientOptions<TodoAny> & {
   cacheOptions?: InMemoryCacheConfig;
@@ -89,26 +60,7 @@ export type ApolloUploadFetchOptions = RequestInit & {
 
 export const DEFAULT_DEBOUNCE_TIMEOUT = 300;
 
-export function logger(message: string | Error, props = {}): void {
-  const level = get(props, 'level', 'info');
-  if (
-    process.env.NEXT_PUBLIC_RUNTIME_ENV !== 'production' && // support public nextjs env-vars
-    process.env.RUNTIME_ENV !== 'production'
-  ) {
-    if (!message) {
-      // eslint-disable-next-line no-console
-      console.error('Logger has received event without message', props);
-      return;
-    }
-    if (message instanceof Error) {
-      // eslint-disable-next-line no-console
-      console.error(message, props);
-      return;
-    }
-    // eslint-disable-next-line no-console
-    console[level](message, props);
-  }
-}
+export const logger = graphQLLogger;
 
 //
 export const errorLink = onApolloError(({ response, graphQLErrors, networkError }) => {
@@ -239,6 +191,28 @@ export function serverClient<TContext>(ctx: TContext, o: ApolloClientOptions): A
   });
 }
 
+class WebSocketLink extends ApolloLink {
+  private client: WsClient;
+
+  constructor(options: WsClientOptions) {
+    super();
+    this.client = createWsClient(options);
+  }
+
+  public request(operation: Operation): Observable<FetchResult> {
+    return new Observable((sink) => {
+      return this.client.subscribe<FetchResult>(
+        { ...operation, query: print(operation.query) },
+        {
+          next: sink.next.bind(sink),
+          complete: sink.complete.bind(sink),
+          error: sink.error.bind(sink),
+        },
+      );
+    });
+  }
+}
+
 export type BrowserClientMiddleware = (operation: Operation) => void;
 
 export type BrowserClientParams = {
@@ -270,12 +244,9 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
   //
   const wsLink = wsURI
     ? new WebSocketLink({
-        uri: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
-        options: {
-          reconnect: true,
-          connectionParams: {
-            // token: 'get token from the cookies?',
-          },
+        url: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
+        connectionParams: {
+          // token: 'get token from the cookies?',
         },
       })
     : null;
@@ -363,108 +334,6 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
   });
 }
 
-export type GetListKeyFromDataTypeOptions = {
-  suffix?: string;
-};
-
-export function getListKeyFromDataType(
-  dataType: string,
-  options?: GetListKeyFromDataTypeOptions,
-): string {
-  const { suffix = '' } = options ?? {};
-  return `get${dataType.replace(/s$/, 'se').replace(/y$/, 'ie')}s${suffix}`;
-}
-
-//
-const ValidIdTypes = ['string', 'number'];
-export function compareIds(id1: unknown, id2: unknown): boolean {
-  //
-  if (!ValidIdTypes.includes(typeof id1) || !ValidIdTypes.includes(typeof id2)) {
-    return false;
-  }
-  return `${id1}` === `${id2}`;
-}
-
-export function compareValues(a: unknown, b: unknown): boolean {
-  if (!a && !b) {
-    return true;
-  }
-  if ((!a && b) || (a && !b)) {
-    return false;
-  }
-  return isEqualWith(a, b, () =>
-    // @ts-ignore
-    uniq(Object.keys(a).concat(Object.keys(b))).every((field) => {
-      const value = get(a, field);
-      const newValue = get(b, field);
-      if (typeof value !== 'object' || !value) {
-        return isEqual(value, newValue);
-      }
-      return compareValues(value, newValue);
-    }),
-  );
-}
-
-export type CachedObjectRef = { __ref: string };
-
-export function updateAfterMutation(dataType: string, listFieldName?: string) {
-  return (cache: ApolloCache<unknown>, { data }: FetchResult): void => {
-    const createdRow = get(data, `create${dataType}`) as DataRow | DataRow[];
-    const removedRow = get(data, `remove${dataType}`) as DataRow | DataRow[];
-    //
-    const mutationResult = createdRow || removedRow;
-    if (!mutationResult) {
-      return;
-    }
-    (Array.isArray(mutationResult) ? mutationResult : [mutationResult]).forEach((row) => {
-      const cacheId = cache.identify(row);
-      if (!cacheId) {
-        return;
-      }
-      //
-      cache.modify({
-        fields: {
-          [listFieldName || getListKeyFromDataType(dataType)](cachedData, { toReference }) {
-            if (createdRow) {
-              if (Array.isArray(cachedData)) {
-                // eslint-disable-next-line no-underscore-dangle
-                if (cachedData.some((r) => compareIds(r.__ref, cacheId))) {
-                  return cachedData;
-                }
-                return [toReference(cacheId)].concat(cachedData);
-              }
-              //
-              const { rows, count } = cachedData;
-              // eslint-disable-next-line no-underscore-dangle
-              if (rows.some((r: CachedObjectRef) => compareIds(r.__ref, cacheId))) {
-                return cachedData;
-              }
-              return {
-                count: count + 1,
-                rows: [toReference(cacheId)].concat(rows),
-              };
-            }
-            if (removedRow) {
-              if (Array.isArray(cachedData)) {
-                // eslint-disable-next-line no-underscore-dangle
-                return cachedData.filter((r) => !compareIds(r.__ref, cacheId));
-              }
-              const { rows, count } = cachedData;
-              return {
-                count: count - 1,
-                // eslint-disable-next-line no-underscore-dangle
-                rows: rows.filter((r: CachedObjectRef) => !compareIds(r.__ref, cacheId)),
-              };
-            }
-            //
-            return cachedData;
-          },
-        },
-      });
-    });
-  };
-}
-
 export const Query = ({ pollInterval, ...props }: QueryComponentOptions): JSX.Element => (
   <ApolloQuery
     partialRefetch
@@ -478,245 +347,6 @@ export const Query = ({ pollInterval, ...props }: QueryComponentOptions): JSX.El
 );
 Query.propTypes = { pollInterval: PropTypes.number };
 Query.defaultProps = { pollInterval: 0 };
-
-//
-export function getDataFromResponse(dataType: string) {
-  return (data: QueryResult): DataRowPaginatedList => {
-    if (data) {
-      return (
-        data[getListKeyFromDataType(dataType, { suffix: 'V2' })] || // try to find latest version of the query (with 'V2' on the query-name end)
-        data[getListKeyFromDataType(dataType)] || // try to find query with 'ies' or 'es' on the end of the name
-        // try to find query with common 'List' suffix or fall-back to the object with empty rows-array and zero count
-        data[`get${dataType}List`] || { rows: [], count: 0 }
-      );
-    }
-    return {
-      rows: [],
-      count: 0,
-    };
-  };
-}
-
-export function getDataFromSubscriptionEvent(dataType: string) {
-  return (prev: ApolloState, { subscriptionData }: OnSubscriptionDataOptions): ApolloState => {
-    if (!subscriptionData.data) return prev;
-    const eventPrefix = camelCase(dataType);
-    const createdRow = get(subscriptionData, `data.${eventPrefix}Created`);
-    const changedRow = get(subscriptionData, `data.${eventPrefix}Changed`);
-    const removedRow = get(subscriptionData, `data.${eventPrefix}Removed`);
-    const event = createdRow || changedRow || removedRow;
-    logger(`[SUBSCRIPTION] ${dataType} create/change/remove`, {
-      createdRow,
-      changedRow,
-      removedRow,
-    });
-    if (changedRow) {
-      return prev;
-    }
-    //
-    const listFieldName = getListKeyFromDataType(dataType);
-    const prevData = prev[listFieldName] as DataRow[] | DataRowPaginatedList;
-    logger(`[SUBSCRIPTION] get ${listFieldName}`, prevData);
-
-    if (removedRow) {
-      if (Array.isArray(prevData)) {
-        return {
-          ...prev,
-          [listFieldName]: prevData.filter((e: DataRow) => !compareIds(e.id, removedRow.id)),
-        };
-      }
-      return {
-        ...prev,
-        [listFieldName]: {
-          ...prevData,
-          count: prevData.count - 1,
-          rows: prevData.rows.filter((e: DataRow) => !compareIds(e.id, removedRow.id)),
-        },
-      };
-    }
-    //
-    const existRow = (Array.isArray(prevData) ? prevData : prevData.rows).find((e: DataRow) =>
-      compareIds(e.id, event.id),
-    );
-    if (existRow) {
-      logger(`[SUBSCRIPTION] ${dataType} already exists`, existRow);
-      return prev;
-    }
-
-    //
-    if (Array.isArray(prevData)) {
-      return {
-        ...prev,
-        [listFieldName]: [event].concat(prevData),
-      };
-    }
-    //
-    return {
-      ...prev,
-      [listFieldName]: {
-        ...prevData,
-        count: prevData.count + 1,
-        rows: [event].concat(prevData.rows),
-      },
-    };
-  };
-}
-
-export type UnsubscribeToMoreFn = () => void;
-
-const initialSubscriptionsSet: Map<
-  Document,
-  { id: string; dataType: string; variables: unknown; unsubscribe: UnsubscribeToMoreFn }
-> = new Map([]);
-
-export type SubscribeToMoreProps = {
-  subscriptionId: string;
-  subscriptionQueries: Document[];
-  variables: unknown;
-  dataType: string;
-  subscribeToMore: (params: {
-    document: Document;
-    variables: unknown;
-    updateQuery: any;
-  }) => UnsubscribeToMoreFn;
-};
-
-export function useSubscribeToMore(props: SubscribeToMoreProps): void {
-  const { subscriptionQueries, variables, dataType, subscribeToMore, subscriptionId } = props;
-  const [subscriptions] = useState(initialSubscriptionsSet);
-  const updateQuery = useMemo(() => getDataFromSubscriptionEvent(dataType), [dataType]);
-  const subscribe = useCallback(() => {
-    //
-    subscriptions.forEach((subscription, document) => {
-      const variablesChanged =
-        (compareIds(subscription.id, subscriptionId) ||
-          (!subscriptionId && dataType === subscription.dataType)) &&
-        !compareValues(variables, subscription.variables);
-      if (variablesChanged) {
-        logger('SubscriptionHandler.variablesChanged', {
-          subscriptionId,
-          dataType,
-          variables,
-          oldVariables: subscription.variables,
-        });
-        subscription.unsubscribe();
-        subscriptions.delete(document);
-      }
-    });
-    //
-    if (Array.isArray(subscriptionQueries) && typeof subscribeToMore === 'function') {
-      subscriptionQueries.forEach((document) => {
-        if (subscriptions.has(document)) {
-          return;
-        }
-        logger('SubscriptionHandler.initSubscription', { subscriptionId, dataType, variables });
-        subscriptions.set(document, {
-          id: subscriptionId,
-          dataType,
-          variables,
-          unsubscribe: subscribeToMore({
-            document,
-            variables,
-            updateQuery,
-          }),
-        });
-      });
-    }
-  }, [
-    subscriptionId,
-    subscriptions,
-    updateQuery,
-    subscriptionQueries,
-    variables,
-    dataType,
-    subscribeToMore,
-  ]);
-  //
-  useEffect(() => {
-    subscribe();
-  }, [subscribe]);
-}
-
-export function onError(props: { t: TFunction }): (error: ApolloError) => void {
-  const { t } = props;
-  // @ts-ignore
-  if (props.onError === 'function') {
-    // @ts-ignore
-    return (error: ApolloError) => props.onError(error);
-  }
-  //
-  return (error: ApolloError) => {
-    Modal.error({
-      title: t('Error'),
-      content: error.message.replace('GraphQL error:', ' ').trim(),
-    });
-  };
-}
-
-export type MutateFn = (
-  options?: MutationFunctionOptions<TodoAny, Record<string, TodoAny>> | undefined,
-) => Promise<FetchResult<TodoAny, Record<string, TodoAny>, Record<string, TodoAny>>>;
-
-export type MutationProps = {
-  children: (mutate: MutateFn, res: MutationResult) => void;
-  autoCommitInterval?: number;
-  mutation: DocumentNode;
-};
-
-export function useQuery(query: DocumentNode, options: QueryHookOptions): QueryResult {
-  return ApolloUseQuery(query, {
-    partialRefetch: true,
-    returnPartialData: true,
-    errorPolicy: 'all',
-    fetchPolicy: 'cache-and-network',
-    ...(options || {}),
-  });
-}
-
-export function useMutation<
-  TData = TodoAny,
-  TVariables = OperationVariables,
-  TContext = DefaultContext,
-  TCache extends ApolloCache<TodoAny> = ApolloCache<TodoAny>,
->(
-  mutation: DocumentNode | TypedDocumentNode<TData, TVariables>,
-  options: MutationHookOptions<TData, TVariables, TContext> & { autoCommitInterval?: number },
-): MutationTuple<TData, TVariables, TContext, TCache> {
-  const { t } = useTranslation();
-  const { autoCommitInterval } = options || {};
-  //
-  const mutationTuple = ApolloUseMutation(mutation, {
-    onError(error) {
-      logger('useMutation.onError', error);
-      Modal.error({
-        title: t('Error'),
-        content: error.message.replace('GraphQL error:', ' ').trim(),
-      });
-    },
-    onCompleted(res) {
-      logger('useMutation.onCompleted', res);
-    },
-    ...(options || {}),
-  });
-  //
-  const [mutate] = mutationTuple;
-  //
-  useEffect(() => {
-    const autoCommitter =
-      typeof autoCommitInterval === 'number' && autoCommitInterval > 0
-        ? setInterval(mutate, autoCommitInterval)
-        : null;
-    //
-    return () => {
-      //
-      if (autoCommitter) {
-        clearInterval(autoCommitter);
-      }
-    };
-  }, [mutate, autoCommitInterval]);
-  //
-  return mutationTuple;
-}
 
 export const Mutation = ({ children, mutation, ...props }: MutationProps): void => {
   //
@@ -757,5 +387,21 @@ export {
   OperationVariables,
   TypedDocumentNode,
 } from '@apollo/client/core';
-
 export { DocumentNode, OperationDefinitionNode } from 'graphql';
+export { compareIds, compareValues } from './helpers';
+export {
+  useApolloError,
+  useSubscribeToMore,
+  SubscribeToMoreProps,
+  UnsubscribeToMoreFn,
+} from './hooks';
+export {
+  DataRow,
+  PaginatedList,
+  ApolloState,
+  CachedObjectRef,
+  getListKeyFromDataType,
+  getDataFromResponse,
+  getDataFromSubscriptionEvent,
+  updateAfterMutation,
+} from './cache-manager';

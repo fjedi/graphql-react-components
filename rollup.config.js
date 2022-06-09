@@ -3,6 +3,8 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import { terser } from 'rollup-plugin-terser';
+import replace from '@rollup/plugin-replace';
+import nodePolyfills from 'rollup-plugin-node-polyfills';
 //
 import pkg from './package.json';
 
@@ -13,6 +15,10 @@ const commonOutputOptions = {
   strict: false,
 };
 const commonPluginsHead = [
+  replace({
+    'process.env.NODE_ENV': JSON.stringify('production'),
+    preventAssignment: true,
+  }),
   // Preferably set as first plugin.
   peerDepsExternal(),
 ];
@@ -56,7 +62,12 @@ export default [
         ...commonOutputOptions,
       },
     ],
-    plugins: [...commonPluginsHead, nodeResolve({ browser: false }), ...commonPluginsMiddle],
+    plugins: [
+      ...commonPluginsHead,
+      nodePolyfills(),
+      nodeResolve({ browser: false }),
+      ...commonPluginsMiddle,
+    ],
   },
   // react-native bundle
   {
@@ -70,6 +81,7 @@ export default [
     ],
     plugins: [
       ...commonPluginsHead,
+      nodePolyfills(),
       nodeResolve({ browser: false, exportConditions: ['node'] }),
       ...commonPluginsMiddle,
       // terser({

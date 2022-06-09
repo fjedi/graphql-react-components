@@ -17,7 +17,13 @@ module.exports = {
   ],
   settings: {
     react: {
-      version: '17',
+      version: '18',
+    },
+    'import/resolver': {
+      node: {
+        paths: ['node_modules'],
+        extensions: ['.js', '.ts', '.tsx', '.json'],
+      },
     },
   },
   env: {
