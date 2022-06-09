@@ -2,7 +2,7 @@
 import fetch from 'cross-fetch';
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import { OperationDefinitionNode, print } from 'graphql';
+import { OperationDefinitionNode } from 'graphql';
 // Apollo client library
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
@@ -15,8 +15,6 @@ import {
   InMemoryCacheConfig,
   NormalizedCacheObject,
   Operation,
-  Observable,
-  FetchResult,
 } from '@apollo/client/core';
 import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
 import { sha256 } from 'crypto-hash';
@@ -24,16 +22,13 @@ import DebounceLink from 'apollo-link-debounce';
 import { getMainDefinition } from '@apollo/client/utilities';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { createHttpLink } from '@apollo/client/link/http';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { onError as onApolloError } from '@apollo/client/link/error';
 import { createUploadLink } from 'apollo-upload-client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/react/components';
-import {
-  createClient as createWsClient,
-  ClientOptions as WsClientOptions,
-  Client as WsClient,
-} from 'graphql-ws';
+import { createClient as createWsClient } from 'graphql-ws';
 import get from 'lodash/get';
 import pick from 'lodash/pick';
 import omit from 'lodash/omit';
@@ -191,28 +186,6 @@ export function serverClient<TContext>(ctx: TContext, o: ApolloClientOptions): A
   });
 }
 
-class WebSocketLink extends ApolloLink {
-  private client: WsClient;
-
-  constructor(options: WsClientOptions) {
-    super();
-    this.client = createWsClient(options);
-  }
-
-  public request(operation: Operation): Observable<FetchResult> {
-    return new Observable((sink) => {
-      return this.client.subscribe<FetchResult>(
-        { ...operation, query: print(operation.query) },
-        {
-          next: sink.next.bind(sink),
-          complete: sink.complete.bind(sink),
-          error: sink.error.bind(sink),
-        },
-      );
-    });
-  }
-}
-
 export type BrowserClientMiddleware = (operation: Operation) => void;
 
 export type BrowserClientParams = {
@@ -243,12 +216,11 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
     '';
   //
   const wsLink = wsURI
-    ? new WebSocketLink({
-        url: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
-        connectionParams: {
-          // token: 'get token from the cookies?',
-        },
-      })
+    ? new GraphQLWsLink(
+        createWsClient({
+          url: wsURI.replace(/(https|http)/, isSSL ? 'wss' : 'ws'),
+        }),
+      )
     : null;
   //
   const metadataLink = new ApolloLink((operation, forward) => {
