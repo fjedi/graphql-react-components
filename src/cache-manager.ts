@@ -1,5 +1,11 @@
 import { ApolloQueryResult, OperationVariables } from '@apollo/client/core';
-import { ApolloCache, MutationResult, OnSubscriptionDataOptions } from '@apollo/client';
+import {
+  ApolloCache,
+  MutationResult,
+  OnSubscriptionDataOptions,
+  MutationUpdaterFunction,
+  DefaultContext,
+} from '@apollo/client';
 import camelCase from 'lodash/camelCase';
 import get from 'lodash/get';
 import logger from './logger';
@@ -133,7 +139,10 @@ export function getDataFromSubscriptionEvent(
   };
 }
 
-export function updateAfterMutation(dataType: string, listFieldName?: string) {
+export function updateAfterMutation(
+  dataType: string,
+  listFieldName?: string,
+): MutationUpdaterFunction<any, OperationVariables, DefaultContext, ApolloCache<any>> {
   return (cache: ApolloCache<unknown>, result: MutationResult): void => {
     const { data } = result;
     const createdRow = get(data, `create${dataType}`) as DataRow | DataRow[];
