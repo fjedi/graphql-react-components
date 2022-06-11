@@ -56,10 +56,11 @@ export function useSubscribeToMore(props: SubscribeToMoreProps): void {
   const subscribe = useCallback(() => {
     //
     subscriptions.forEach((subscription, document) => {
+      const currentSubscription =
+        compareIds(subscription.id, subscriptionId) ||
+        (!subscriptionId && dataType === subscription.dataType);
       const variablesChanged =
-        (compareIds(subscription.id, subscriptionId) ||
-          (!subscriptionId && dataType === subscription.dataType)) &&
-        !compareValues(variables, subscription.variables);
+        currentSubscription && !compareValues(variables, subscription.variables);
       if (variablesChanged) {
         logger('SubscriptionHandler.variablesChanged', {
           subscriptionId,
