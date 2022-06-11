@@ -248,6 +248,10 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
   const httpLink = createUploadLink({
     uri,
     credentials: 'include',
+    headers: {
+      // When configuring your file upload client, we need to send a non-empty Apollo-Require-Preflight header or Apollo Server will block the request. (CSRF prevention)
+      'Apollo-Require-Preflight': 'true',
+    },
     fetch(u: string, options: ApolloUploadFetchOptions) {
       if (typeof options.onProgress === 'function') {
         return uploadFetch(u, options);
