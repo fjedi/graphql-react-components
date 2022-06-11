@@ -372,6 +372,7 @@ export {
   useSubscribeToMore,
   SubscribeToMoreProps,
   UnsubscribeToMoreFn,
+  usePreviousValue,
 } from './hooks';
 export {
   DataRow,

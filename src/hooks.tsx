@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   QueryHookOptions,
   useMutation as ApolloUseMutation,
@@ -16,7 +16,7 @@ import { MutationHookOptions } from '@apollo/client/react';
 import { DocumentNode } from 'graphql';
 import { useTranslation } from 'react-i18next';
 import Modal from 'antd/lib/modal';
-import { compareIds, compareValues } from './helpers';
+import { compareValues } from './helpers';
 import { getDataFromSubscriptionEvent } from './cache-manager';
 import logger from './logger';
 
@@ -25,11 +25,6 @@ import logger from './logger';
 type TodoAny = any;
 
 export type UnsubscribeToMoreFn = () => void;
-
-const initialSubscriptionsSet: Map<
-  DocumentNode,
-  { id: string; dataType: string; variables: OperationVariables; unsubscribe: UnsubscribeToMoreFn }
-> = new Map([]);
 
 export type SubscribeToMoreProps = {
   subscriptionId: string;
@@ -43,67 +38,43 @@ export type SubscribeToMoreProps = {
   }) => UnsubscribeToMoreFn;
 };
 
+export function usePreviousValue(value: unknown) {
+  const ref = useRef<unknown>();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
+}
+
 export function useSubscribeToMore(props: SubscribeToMoreProps): void {
   const { subscriptionQueries, variables, dataType, subscribeToMore, subscriptionId } = props;
-  const [subscriptions] = useState(initialSubscriptionsSet);
   const updateQuery = useMemo(
     () =>
       getDataFromSubscriptionEvent(dataType, {
         variables,
       }),
-    [dataType],
+    [dataType, variables],
   );
+  const previousVariables = usePreviousValue(variables);
+  const variablesChanged = !compareValues(variables, previousVariables);
+
   const subscribe = useCallback(() => {
-    //
-    subscriptions.forEach((subscription, document) => {
-      const currentSubscription =
-        compareIds(subscription.id, subscriptionId) ||
-        (!subscriptionId && dataType === subscription.dataType);
-      const variablesChanged =
-        currentSubscription && !compareValues(variables, subscription.variables);
-      if (variablesChanged) {
-        logger('SubscriptionHandler.variablesChanged', {
-          subscriptionId,
-          dataType,
-          variables,
-          oldVariables: subscription.variables,
-        });
-        subscription.unsubscribe();
-        subscriptions.delete(document);
-      }
-    });
-    //
-    if (Array.isArray(subscriptionQueries) && typeof subscribeToMore === 'function') {
-      subscriptionQueries.forEach((document) => {
-        if (subscriptions.has(document)) {
-          return;
-        }
-        logger('SubscriptionHandler.initSubscription', { subscriptionId, dataType, variables });
-        subscriptions.set(document, {
-          id: subscriptionId,
-          dataType,
-          variables,
-          unsubscribe: subscribeToMore({
-            document,
-            variables,
-            updateQuery,
-          }),
-        });
+    return subscriptionQueries.map((document) => {
+      logger('SubscriptionHandler.initSubscription', { subscriptionId, dataType, variables });
+      return subscribeToMore({
+        document,
+        variables,
+        updateQuery,
       });
-    }
-  }, [
-    subscriptionId,
-    subscriptions,
-    updateQuery,
-    subscriptionQueries,
-    variables,
-    dataType,
-    subscribeToMore,
-  ]);
+    });
+  }, [subscriptionId, updateQuery, subscriptionQueries, variables, dataType, subscribeToMore]);
   //
   useEffect(() => {
-    subscribe();
-  }, [subscribe]);
+    const unsubscribeCallbacks = subscribe();
+    return () => {
+      unsubscribeCallbacks.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [subscribe, variablesChanged]);
 }
 
 export function useApolloError() {
