@@ -76,7 +76,9 @@ export function getDataFromSubscriptionEvent(
     }
     const eventPrefix = camelCase(dataType);
     const createdRow = subscriptionData?.data?.[`${eventPrefix}Created`];
-    const changedRow = subscriptionData?.data?.[`${eventPrefix}Updated`];
+    const changedRow =
+      subscriptionData?.data?.[`${eventPrefix}Updated`] ||
+      subscriptionData?.data?.[`${eventPrefix}Changed`];
     const removedRow = subscriptionData?.data?.[`${eventPrefix}Removed`];
     const event = createdRow || changedRow || removedRow;
     logger(`[SUBSCRIPTION] ${dataType} create/change/remove`, {
