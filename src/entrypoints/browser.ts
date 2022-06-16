@@ -117,12 +117,14 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
   const uri =
     url || //
     process.env.NEXT_PUBLIC_API_URL || // support public nextjs env-vars
+    process.env.NEXT_PUBLIC_API_URI || // support public nextjs env-vars
     process.env.API_URL ||
     '';
   const isSSL = uri.indexOf('https') === 0;
   const wsURI =
     wsURL ||
     process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || // support public nextjs env-vars
+    process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URI || // support public nextjs env-vars
     process.env.SUBSCRIPTIONS_URL ||
     '';
   //
