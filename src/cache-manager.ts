@@ -6,7 +6,10 @@ import {
   MutationUpdaterFunction,
   DefaultContext,
 } from '@apollo/client';
+import dayjs from 'dayjs';
 import camelCase from 'lodash/camelCase';
+import orderBy from 'lodash/orderBy';
+import uniqBy from 'lodash/uniqBy';
 import get from 'lodash/get';
 import logger from './logger';
 import { compareIds } from './helpers';
@@ -202,3 +205,60 @@ export function updateAfterMutation(
     });
   };
 }
+
+// NestedArray<T> represents T or Array of T or Array of Arrays of T .....
+// let nestedNumbers: NestedArray<number> = [[[[[1]]]]];
+export type NestedKeyArgsArray<T> = Array<T | NestedKeyArgsArray<T>>;
+
+export function getCacheKeyArgs(args: any): NestedKeyArgsArray<string> {
+  if (!args || Array.isArray(args) || typeof args !== 'object') {
+    return [];
+  }
+  const keyArgs: NestedKeyArgsArray<string> = [];
+  const { pagination, ...queryArgs } = args ?? {};
+  Object.keys(queryArgs).forEach((arg) => {
+    const v = args[arg];
+    keyArgs.push(arg);
+    if (v && typeof v === 'object') {
+      const a = getCacheKeyArgs(v);
+      if (a.length > 0) {
+        keyArgs.push(a);
+      }
+    }
+  });
+  return keyArgs;
+}
+
+export const mergePaginatedList: {
+  keyArgs: any;
+  merge: (existing: PaginatedList, incoming: PaginatedList, context: any) => ApolloState;
+} = {
+  // Don't cache separate results based on
+  // any of this field's arguments.
+  keyArgs: getCacheKeyArgs,
+  // Concatenate the incoming list items with
+  // the existing list items.
+  merge(existing: PaginatedList, incoming: PaginatedList, context: any) {
+    const { direction, field } = context?.args?.sort ?? context?.variables?.sort ?? {};
+    const r = uniqBy([...(existing?.rows ?? []), ...(incoming?.rows ?? [])], '__ref');
+    const rows =
+      direction && field
+        ? orderBy(
+            r,
+            (ref) => {
+              const value = context.readField(field, ref);
+              if (dayjs(value).isValid()) {
+                return dayjs(value).unix();
+              }
+              return value;
+            },
+            direction.toLowerCase(),
+          )
+        : r;
+    return {
+      ...(existing || {}),
+      ...(incoming || {}),
+      rows,
+    };
+  },
+};

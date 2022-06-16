@@ -383,4 +383,7 @@ export {
   getDataFromResponse,
   getDataFromSubscriptionEvent,
   updateAfterMutation,
+  mergePaginatedList,
+  getCacheKeyArgs,
+  NestedKeyArgsArray,
 } from './cache-manager';
