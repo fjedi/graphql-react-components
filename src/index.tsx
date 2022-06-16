@@ -1,6 +1,5 @@
 // Ponyfill for isomorphic 'fetch'
 import fetch from 'cross-fetch';
-import { XMLHttpRequest } from 'w3c-xmlhttprequest';
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import { OperationDefinitionNode } from 'graphql';
@@ -91,8 +90,12 @@ export function parseXHRHeaders(rawHeaders: string): Headers {
   return headers;
 }
 
-export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Promise<Response> =>
-  new Promise((resolve, reject) => {
+export function uploadFetch(url: string, options: ApolloUploadFetchOptions): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    if (typeof XMLHttpRequest === 'undefined') {
+      reject(new Error('XMLHttpRequest is not defined'));
+      return;
+    }
     const logMessagePrefix = '[graphQL.uploadFetch] ';
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = options.credentials !== 'omit';
@@ -138,6 +141,7 @@ export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Pro
 
     xhr.send(options.body as TodoAny);
   });
+}
 
 // Helper function to create a new Apollo client, by merging in
 // passed options alongside any set by `config.setApolloClientOptions` and defaults
