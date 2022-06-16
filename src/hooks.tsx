@@ -90,7 +90,7 @@ export function useApolloError() {
 export function useQuery<TData = any, TVariables = OperationVariables>(
   query: DocumentNode | TypedDocumentNode<TData, TVariables>,
   options?: QueryHookOptions<TData, TVariables>,
-): QueryResult<TData> {
+): QueryResult<TData, TVariables> {
   return ApolloUseQuery(query, {
     partialRefetch: true,
     returnPartialData: true,
