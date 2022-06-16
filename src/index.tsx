@@ -92,7 +92,7 @@ export function parseXHRHeaders(rawHeaders: string): Headers {
 
 export function uploadFetch(url: string, options: ApolloUploadFetchOptions): Promise<Response> {
   return new Promise((resolve, reject) => {
-    if (typeof XMLHttpRequest === 'undefined') {
+    if (typeof window === 'undefined' || typeof XMLHttpRequest === 'undefined') {
       reject(new Error('XMLHttpRequest is not defined'));
       return;
     }
