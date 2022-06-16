@@ -59,10 +59,14 @@ export {
   ApolloClientOptions as ClientOptions,
   NormalizedCacheObject,
   Operation,
-  DefaultContext,
-  OperationVariables,
   TypedDocumentNode,
 } from '@apollo/client/core';
+export {
+  DefaultContext,
+  ApolloQueryResult,
+  MutationUpdaterFn,
+  OperationVariables,
+} from '@apollo/client/core/types';
 export { DocumentNode, OperationDefinitionNode } from 'graphql';
 export { compareIds, compareValues } from './helpers';
 export {
