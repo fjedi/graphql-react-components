@@ -43,6 +43,11 @@ export {
   ApolloError,
   InMemoryCache,
   InMemoryCacheConfig,
+  MutationFunction,
+  MutationHookOptions,
+  BaseMutationOptions,
+  MutationResult,
+  gql,
 } from '@apollo/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 export { graphql, withApollo } from '@apollo/client/react/hoc';
