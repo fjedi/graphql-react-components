@@ -1,5 +1,3 @@
-import { MouseEvent } from 'react';
-
 export type LoggerProps = { level?: 'info' | 'warn' | 'error'; [k: string]: unknown };
 
 export type LoggerEvent = Event | MouseEvent;
@@ -8,7 +6,7 @@ export default function logger(message: string | Error, props?: LoggerProps | Er
   let level;
   if (props instanceof Error) {
     level = 'error';
-  } else if (props instanceof Event || props instanceof MouseEvent) {
+  } else if (props instanceof Event) {
     level = 'info';
   } else {
     level = props?.level ?? 'info';

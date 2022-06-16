@@ -1,6 +1,6 @@
 {
   "name": "@fjedi/graphql-react-components",
-  "version": "9.2.7",
+  "version": "9.2.8",
   "description": "A set of helpers for managing apollo-graphql inside react-app",
   "browser": "dist/browser",
   "main": "dist/index.js",
