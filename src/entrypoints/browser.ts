@@ -116,16 +116,18 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
     initialState || typeof window !== 'undefined' ? get(window, '__APOLLO_STATE__') : undefined;
   const uri =
     url || //
-    process.env.NEXT_PUBLIC_API_URL || // support public nextjs env-vars
-    process.env.NEXT_PUBLIC_API_URI || // support public nextjs env-vars
     process.env.API_URL ||
+    process.env.NEXT_PUBLIC_API_URL || // support public nextjs env-vars
+    // support segmented api-url passed in nextjs env-vars
+    `${process.env.NEXT_PUBLIC_API_PROTO}://${process.env.NEXT_PUBLIC_API_HOST}${process.env.NEXT_PUBLIC_API_URI}` ||
     '';
   const isSSL = uri.indexOf('https') === 0;
   const wsURI =
     wsURL ||
-    process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || // support public nextjs env-vars
-    process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URI || // support public nextjs env-vars
     process.env.SUBSCRIPTIONS_URL ||
+    process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || // support public nextjs env-vars
+    // support segmented ws-url passed in nextjs env-vars
+    `${process.env.NEXT_PUBLIC_API_PROTO}://${process.env.NEXT_PUBLIC_API_HOST}${process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URI}` ||
     '';
   //
   const wsLink = wsURI

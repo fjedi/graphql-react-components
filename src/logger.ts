@@ -6,10 +6,8 @@ export default function logger(message: string | Error, props?: LoggerProps | Er
   let level;
   if (props instanceof Error) {
     level = 'error';
-  } else if (props instanceof Event) {
-    level = 'info';
   } else {
-    level = props?.level ?? 'info';
+    level = (props as LoggerProps)?.level ?? 'info';
   }
   if (
     process.env.NEXT_PUBLIC_RUNTIME_ENV !== 'production' && // support public nextjs env-vars
