@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/fjedi/graphql-react-components#readme",
   "dependencies": {
-    "@apollo/client": "3.6.6",
+    "@apollo/client": "3.6.8",
     "@types/apollo-upload-client": "17.0.0",
     "apollo-link-debounce": "3.0.0",
     "apollo-upload-client": "17.0.0",
