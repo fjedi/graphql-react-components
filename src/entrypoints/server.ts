@@ -1,7 +1,7 @@
 import { from as mergeLinks, InMemoryCache } from '@apollo/client/core';
 import { createHttpLink } from '@apollo/client/link/http';
-import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
-import { sha256 } from 'crypto-hash';
+// import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
+// import { sha256 } from 'crypto-hash';
 import omit from 'lodash/omit';
 import pick from 'lodash/pick';
 import { ApolloClient, ApolloClientOptions, createClient, errorLink } from '../client';
@@ -37,16 +37,20 @@ export function serverClient<TContext>(
     credentials: 'include',
     headers,
   });
-  const persistedQueryLink = createPersistedQueryLink({
-    useGETForHashedQueries: true,
-    sha256,
-  });
+  // const persistedQueryLink = createPersistedQueryLink({
+  //   useGETForHashedQueries: true,
+  //   sha256,
+  // });
   const cache = new InMemoryCache(o.cacheOptions);
   //
   return createClient({
     ssrMode: true,
     cache,
-    link: mergeLinks([errorLink, persistedQueryLink, httpLink]),
+    link: mergeLinks([
+      errorLink,
+      //  persistedQueryLink,
+      httpLink,
+    ]),
     ...omit(o, ['cache', 'ssrMode']),
   });
 }
