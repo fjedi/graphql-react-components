@@ -1,6 +1,6 @@
 {
   "name": "@fjedi/graphql-react-components",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "A set of helpers for managing apollo-graphql inside react-app",
   "browser": "dist/browser",
   "main": "dist/index.js",
@@ -8,10 +8,10 @@
     "dist"
   ],
   "exports": {
-    ".": "dist/index.js",
-    "./browser": "dist/browser.mjs",
-    "./browser.native": "dist/browser.native.js",
-    "./server": "dist/server.js"
+    ".": "./dist/index.js",
+    "./browser": "./dist/browser.mjs",
+    "./browser.native": "./dist/browser.native.js",
+    "./server": "./dist/server.js"
   },
   "private": false,
   "scripts": {
