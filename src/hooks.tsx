@@ -47,7 +47,7 @@ export function usePreviousValue(value: unknown) {
 }
 
 export function useSubscribeToMore(props: SubscribeToMoreProps): void {
-  const { subscriptionQueries, variables, dataType, subscribeToMore, subscriptionId } = props;
+  const { subscriptionQueries = [], variables, dataType, subscribeToMore, subscriptionId } = props;
   const updateQuery = useMemo(
     () =>
       getDataFromSubscriptionEvent(dataType, {
