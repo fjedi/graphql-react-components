@@ -47,6 +47,11 @@ export {
   MutationHookOptions,
   BaseMutationOptions,
   MutationResult,
+  QueryHookOptions,
+  LazyQueryHookOptions,
+  QueryResult,
+  SubscriptionResult,
+  SubscriptionHookOptions,
   gql,
 } from '@apollo/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
