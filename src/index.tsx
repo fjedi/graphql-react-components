@@ -150,7 +150,10 @@ export function createClient(opts: ApolloClientOptions): ApolloClient {
   });
 }
 
-export function serverClient<TContext>(ctx: TContext, o: ApolloClientOptions): ApolloClient {
+export function serverClient<TContext>(
+  ctx: TContext,
+  o: Omit<ApolloClientOptions, 'cache'>,
+): ApolloClient {
   const headers = {
     // @ts-ignore
     Cookie: ctx.request.headers.cookie,
