@@ -113,14 +113,14 @@ export const uploadFetch = (url: string, options: ApolloUploadFetchOptions): Pro
       logger(`${logMessagePrefix}File successfully uploaded`, { body, opts });
       resolve(new Response(body, opts));
     };
-    xhr.onerror = (e) => {
+    xhr.onerror = (e: unknown) => {
       const m = `${logMessagePrefix}Network request failed`;
-      logger(m, e);
+      logger(m, e as Error);
       reject(new Error(m));
     };
-    xhr.ontimeout = (e) => {
+    xhr.ontimeout = (e: unknown) => {
       const m = `${logMessagePrefix}Upload request timed out`;
-      logger(m, e);
+      logger(m, e as Error);
       reject(new Error(m));
     };
     xhr.open(options.method, url, true);
