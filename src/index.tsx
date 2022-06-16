@@ -1,5 +1,7 @@
 // Ponyfill for isomorphic 'fetch'
 import fetch from 'cross-fetch';
+// @ts-ignore
+import XMLHttpRequest from 'xhr2';
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import { OperationDefinitionNode } from 'graphql';
