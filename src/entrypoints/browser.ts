@@ -119,7 +119,9 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
     process.env.API_URL ||
     process.env.NEXT_PUBLIC_API_URL || // support public nextjs env-vars
     // support segmented api-url passed in nextjs env-vars
-    `${process.env.NEXT_PUBLIC_API_PROTO}://${process.env.NEXT_PUBLIC_API_HOST}${process.env.NEXT_PUBLIC_API_URI}` ||
+    `${process.env.NEXT_PUBLIC_API_PROTO || ''}://${process.env.NEXT_PUBLIC_API_HOST || ''}${
+      process.env.NEXT_PUBLIC_API_URI || ''
+    }` ||
     '';
   const isSSL = uri.indexOf('https') === 0;
   const wsURI =
@@ -127,7 +129,9 @@ export function browserClient(params?: BrowserClientParams): ApolloClient {
     process.env.SUBSCRIPTIONS_URL ||
     process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URL || // support public nextjs env-vars
     // support segmented ws-url passed in nextjs env-vars
-    `${process.env.NEXT_PUBLIC_API_PROTO}://${process.env.NEXT_PUBLIC_API_HOST}${process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URI}` ||
+    `${process.env.NEXT_PUBLIC_API_PROTO || ''}://${process.env.NEXT_PUBLIC_API_HOST || ''}${
+      process.env.NEXT_PUBLIC_SUBSCRIPTIONS_URI || ''
+    }` ||
     '';
   //
   const wsLink = wsURI
