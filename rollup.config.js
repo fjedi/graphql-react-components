@@ -65,7 +65,7 @@ export default [
     plugins: [
       ...commonPluginsHead,
       nodePolyfills(),
-      nodeResolve({ browser: false, exportConditions: ['node'] }),
+      nodeResolve({ browser: false }),
       ...commonPluginsMiddle,
     ],
   },
