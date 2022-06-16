@@ -35,7 +35,7 @@ const commonPluginsMiddle = [
 export default [
   // browser/web bundle
   {
-    input,
+    input: 'src/entrypoints/browser.ts',
     output: [
       {
         file: `${pkg.browser}.mjs`,
@@ -52,12 +52,29 @@ export default [
       }),
     ],
   },
-  // nodejs/server-side bundle
+  // isomorphic bundle (client+ssr)
   {
-    input,
+    input: 'src/index.tsx',
     output: [
       {
         file: pkg.main,
+        format: 'cjs',
+        ...commonOutputOptions,
+      },
+    ],
+    plugins: [
+      ...commonPluginsHead,
+      nodePolyfills(),
+      nodeResolve({ browser: false }),
+      ...commonPluginsMiddle,
+    ],
+  },
+  // nodejs/server-side bundle
+  {
+    input: 'src/entrypoints/server.ts',
+    output: [
+      {
+        file: 'dist/server.js',
         format: 'cjs',
         ...commonOutputOptions,
       },
