@@ -3,6 +3,7 @@ import { createHttpLink } from '@apollo/client/link/http';
 import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
 import { sha256 } from 'crypto-hash';
 import omit from 'lodash/omit';
+import pick from 'lodash/pick';
 import { ApolloClient, ApolloClientOptions, createClient, errorLink } from '../client';
 
 export {
