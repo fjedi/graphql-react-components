@@ -29,7 +29,7 @@ export type GetListKeyFromDataTypeOptions = {
   variables?: OperationVariables;
 };
 
-export type ApolloState = { [k: string]: unknown };
+export type ApolloState = { [k: string]: unknown } | DataRow[];
 
 export type CachedObjectRef = { __ref: string };
 
@@ -260,5 +260,35 @@ export const mergePaginatedList: {
       ...(incoming || {}),
       rows,
     };
+  },
+};
+
+export const mergeList: {
+  keyArgs: any;
+  merge: (existing: DataRow[], incoming: DataRow[], context: any) => ApolloState;
+} = {
+  // Don't cache separate results based on
+  // any of this field's arguments.
+  keyArgs: getCacheKeyArgs,
+  // Concatenate the incoming list items with
+  // the existing list items.
+  merge(existing: DataRow[], incoming: DataRow[], context: any) {
+    const { direction, field } = context?.args?.sort ?? context?.variables?.sort ?? {};
+    const r = uniqBy([...(existing ?? []), ...(incoming ?? [])], '__ref');
+    const rows =
+      direction && field
+        ? orderBy(
+            r,
+            (ref) => {
+              const value = context.readField(field, ref);
+              if (dayjs(value).isValid()) {
+                return dayjs(value).unix();
+              }
+              return value;
+            },
+            direction.toLowerCase(),
+          )
+        : r;
+    return rows;
   },
 };
