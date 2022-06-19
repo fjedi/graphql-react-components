@@ -98,6 +98,7 @@ export {
   getDataFromSubscriptionEvent,
   updateAfterMutation,
   mergePaginatedList,
+  mergeList,
   getCacheKeyArgs,
   NestedKeyArgsArray,
 } from './cache-manager';
