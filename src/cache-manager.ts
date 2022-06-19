@@ -289,6 +289,8 @@ export const mergeList: {
             direction.toLowerCase(),
           )
         : r;
+    logger('mergeList', { existing, incoming, rows, direction, field });
+
     return rows;
   },
 };
