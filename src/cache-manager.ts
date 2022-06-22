@@ -164,7 +164,9 @@ export function updateAfterMutation(
       return;
     }
     (Array.isArray(mutationResult) ? mutationResult : [mutationResult]).forEach((row) => {
-      const cacheId = cache.identify(row);
+      const cacheId = cache.identify({
+        __ref: `${dataType}:${row.id}`,
+      });
       if (!cacheId) {
         return;
       }
