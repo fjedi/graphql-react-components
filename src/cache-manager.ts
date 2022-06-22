@@ -101,21 +101,21 @@ export function getDataFromSubscriptionEvent(
       ...(options ?? {}),
       withGetPrefix: true,
     });
-    const prevData = (prev[listFieldName] ?? prev[listFieldNameWithGetPrefix]) as
-      | DataRow[]
-      | PaginatedList;
+    const withoutGetPrefix = !!prev[listFieldName];
+    const cacheFieldName = withoutGetPrefix ? listFieldName : listFieldNameWithGetPrefix;
+    const prevData = prev[cacheFieldName] as DataRow[] | PaginatedList;
     logger(`[SUBSCRIPTION] get ${listFieldName}`, { prevData });
 
     if (removedRow) {
       if (Array.isArray(prevData)) {
         return {
           ...prev,
-          [listFieldName]: prevData.filter((e: DataRow) => !compareIds(e.id, removedRow.id)),
+          [cacheFieldName]: prevData.filter((e: DataRow) => !compareIds(e.id, removedRow.id)),
         };
       }
       return {
         ...prev,
-        [listFieldName]: {
+        [cacheFieldName]: {
           ...prevData,
           count: prevData.count - 1,
           rows: prevData.rows.filter((e: DataRow) => !compareIds(e.id, removedRow.id)),
