@@ -97,7 +97,13 @@ export function getDataFromSubscriptionEvent(
       ...(options ?? {}),
       withGetPrefix: options?.withGetPrefix ?? false,
     });
-    const prevData = prev[listFieldName] as DataRow[] | PaginatedList;
+    const listFieldNameWithGetPrefix = getListKeyFromDataType(dataType, {
+      ...(options ?? {}),
+      withGetPrefix: true,
+    });
+    const prevData = (prev[listFieldName] ?? prev[listFieldNameWithGetPrefix]) as
+      | DataRow[]
+      | PaginatedList;
     logger(`[SUBSCRIPTION] get ${listFieldName}`, { prevData });
 
     if (removedRow) {
@@ -163,9 +169,10 @@ export function updateAfterMutation(
         return;
       }
       //
+      const field = listFieldName || getListKeyFromDataType(dataType);
       cache.modify({
         fields: {
-          [listFieldName || getListKeyFromDataType(dataType)](cachedData, { toReference }) {
+          [field](cachedData, { toReference }) {
             if (createdRow) {
               if (Array.isArray(cachedData)) {
                 // eslint-disable-next-line no-underscore-dangle
