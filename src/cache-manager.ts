@@ -135,13 +135,13 @@ export function getDataFromSubscriptionEvent(
     if (Array.isArray(prevData)) {
       return {
         ...prev,
-        [listFieldName]: updatedRows,
+        [cacheFieldName]: updatedRows,
       };
     }
     //
     return {
       ...prev,
-      [listFieldName]: {
+      [cacheFieldName]: {
         ...prevData,
         count: prevData.count + 1,
         rows: updatedRows,
