@@ -56,7 +56,7 @@ export function getDataFromResponse<T = unknown>(
   ): PaginatedList => {
     if (data) {
       return (
-        // try to find latest version of the query (with 'V2' on the query-name end)
+        // try to find the latest version of the query (with 'V2' on the query-name end)
         // @ts-ignore
         data[getListKeyFromDataType(dataType, { ...options, suffix: 'V2' })] ||
         // @ts-ignore
