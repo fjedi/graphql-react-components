@@ -4,10 +4,6 @@ import { Query as ApolloQuery, QueryComponentOptions } from '@apollo/client/reac
 import graphQLLogger from './logger';
 import { useMutation, MutationProps } from './hooks';
 
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type TodoAny = any;
-
 export const logger = graphQLLogger;
 
 export const Query = ({ pollInterval, ...props }: QueryComponentOptions): JSX.Element => (
@@ -48,8 +44,10 @@ export {
   BaseMutationOptions,
   MutationResult,
   QueryHookOptions,
-  LazyQueryHookOptions,
   QueryResult,
+  LazyQueryHookOptions,
+  LazyQueryResultTuple,
+  LazyQueryResult,
   SubscriptionResult,
   SubscriptionHookOptions,
   gql,

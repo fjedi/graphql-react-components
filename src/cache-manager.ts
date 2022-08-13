@@ -21,6 +21,7 @@ export type DataRow = {
 export type PaginatedList = {
   rows: DataRow[];
   count: number;
+  pageInfo: { current: number; total: number };
 };
 
 export type GetListKeyFromDataTypeOptions = {
@@ -59,12 +60,13 @@ export function getDataFromResponse<T = unknown>(
         // @ts-ignore
         data[`get${dataType}List`] ||
         // @ts-ignore
-        data[`${dataType}s`] || { rows: [], count: 0 }
+        data[`${dataType}s`] || { rows: [], count: 0, pageInfo: { current: 1, total: 1 } }
       );
     }
     return {
       rows: [],
       count: 0,
+      pageInfo: { current: 1, total: 1 },
     };
   };
 }
