@@ -231,8 +231,7 @@ export function getCacheKeyArgs(args: any): NestedKeyArgsArray<string> {
     return [];
   }
   const keyArgs: NestedKeyArgsArray<string> = [];
-  const { pagination, ...queryArgs } = args ?? {};
-  Object.keys(queryArgs).forEach((arg) => {
+  Object.keys(args ?? {}).forEach((arg) => {
     const v = args[arg];
     keyArgs.push(arg);
     if (v && typeof v === 'object') {
