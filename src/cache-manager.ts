@@ -5,6 +5,8 @@ import {
   OnSubscriptionDataOptions,
   MutationUpdaterFunction,
   DefaultContext,
+  LazyQueryResultTuple,
+  QueryResult,
 } from '@apollo/client';
 import dayjs from 'dayjs';
 import camelCase from 'lodash/camelCase';
@@ -49,11 +51,14 @@ export function getDataFromResponse<T = unknown>(
   dataType: string,
   options?: GetListKeyFromDataTypeOptions,
 ) {
-  return (data: ApolloQueryResult<T>): PaginatedList => {
+  return (
+    data: ApolloQueryResult<T> | LazyQueryResultTuple<T, QueryResult<T>>[1]['data'],
+  ): PaginatedList => {
     if (data) {
       return (
+        // try to find latest version of the query (with 'V2' on the query-name end)
         // @ts-ignore
-        data[getListKeyFromDataType(dataType, { ...options, suffix: 'V2' })] || // try to find latest version of the query (with 'V2' on the query-name end)
+        data[getListKeyFromDataType(dataType, { ...options, suffix: 'V2' })] ||
         // @ts-ignore
         data[getListKeyFromDataType(dataType, options)] || // try to find query with 'ies' or 'es' on the end of the name
         // try to find query with common 'List' suffix or fall-back to the object with empty rows-array and zero count
