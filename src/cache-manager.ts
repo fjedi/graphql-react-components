@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import camelCase from 'lodash/camelCase';
 import orderBy from 'lodash/orderBy';
 import uniqBy from 'lodash/uniqBy';
+import omit from 'lodash/omit';
 import get from 'lodash/get';
 import logger from './logger';
 import { compareIds } from './helpers';
@@ -276,6 +277,22 @@ export const mergePaginatedList: {
       rows,
     };
   },
+};
+
+export const mergeInfiniteList: {
+  keyArgs: any;
+  merge: (existing: PaginatedList, incoming: PaginatedList, context: any) => ApolloState;
+} = {
+  // Don't cache separate results based on
+  // any of this field's arguments.
+  keyArgs(args: any) {
+    // in order infinite pagination works properly, we need to ignore pagination-arg
+    // while getting key-args for caching
+    return getCacheKeyArgs(omit(args, ['pagination']));
+  },
+  // Concatenate the incoming list items with
+  // the existing list items.
+  merge: mergePaginatedList.merge,
 };
 
 export const mergeList: {

@@ -96,6 +96,7 @@ export {
   getDataFromSubscriptionEvent,
   updateAfterMutation,
   mergePaginatedList,
+  mergeInfiniteList,
   mergeList,
   getCacheKeyArgs,
   NestedKeyArgsArray,
