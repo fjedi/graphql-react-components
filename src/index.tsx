@@ -100,6 +100,9 @@ export {
   mergeList,
   getCacheKeyArgs,
   NestedKeyArgsArray,
+  FieldPolicy,
+  KeyArgsFunction,
+  KeySpecifier,
 } from './cache-manager';
 export { createClient, ApolloClient, ApolloClientOptions, errorLink } from './client';
 export { serverClient } from './entrypoints/server';

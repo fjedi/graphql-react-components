@@ -1,4 +1,5 @@
-import { ApolloQueryResult, OperationVariables } from '@apollo/client/core';
+import { ApolloQueryResult, FieldPolicy, OperationVariables } from '@apollo/client/core';
+import type { KeyArgsFunction, KeySpecifier } from '@apollo/client/cache/inmemory/policies';
 import {
   ApolloCache,
   MutationResult,
@@ -16,6 +17,9 @@ import omit from 'lodash/omit';
 import get from 'lodash/get';
 import logger from './logger';
 import { compareIds } from './helpers';
+
+export type { FieldPolicy } from '@apollo/client/core';
+export type { KeyArgsFunction, KeySpecifier } from '@apollo/client/cache/inmemory/policies';
 
 export type DataRow = {
   id: string;
@@ -227,34 +231,47 @@ export function updateAfterMutation(
 // let nestedNumbers: NestedArray<number> = [[[[[1]]]]];
 export type NestedKeyArgsArray<T> = Array<T | NestedKeyArgsArray<T>>;
 
-export function getCacheKeyArgs(args: any): NestedKeyArgsArray<string> {
-  if (!args || Array.isArray(args) || typeof args !== 'object') {
+export const getCacheKeyArgs: KeyArgsFunction = (args, context) => {
+  if (!args || typeof args !== 'object') {
     return [];
   }
-  const keyArgs: NestedKeyArgsArray<string> = [];
-  Object.keys(args ?? {}).forEach((arg) => {
-    const v = args[arg];
-    keyArgs.push(arg);
-    if (v && typeof v === 'object') {
-      const a = getCacheKeyArgs(v);
-      if (a.length > 0) {
-        keyArgs.push(a);
+  const keyArgs: Array<string | KeySpecifier> = [];
+  if (Array.isArray(args)) {
+    args.forEach((arg) => {
+      if (typeof arg === 'string') {
+        keyArgs.push(arg);
+      } else {
+        const a = getCacheKeyArgs(arg, context);
+        if (a && a.length) {
+          keyArgs.push(a);
+        }
       }
-    }
-  });
-  return keyArgs;
-}
+    });
+  } else {
+    const argsObject = args as Record<string, unknown>;
+    Object.keys(argsObject).forEach((arg) => {
+      // eslint-disable-next-line security/detect-object-injection
+      const v = argsObject[arg];
+      keyArgs.push(arg);
 
-export const mergePaginatedList: {
-  keyArgs: any;
-  merge: (existing: PaginatedList, incoming: PaginatedList, context: any) => ApolloState;
-} = {
+      if (v && typeof v === 'object') {
+        const a = getCacheKeyArgs(v, context);
+        if (a && a.length) {
+          keyArgs.push(a);
+        }
+      }
+    });
+  }
+  return keyArgs;
+};
+
+export const mergePaginatedList: FieldPolicy = {
   // Don't cache separate results based on
   // any of this field's arguments.
   keyArgs: getCacheKeyArgs,
   // Concatenate the incoming list items with
   // the existing list items.
-  merge(existing: PaginatedList, incoming: PaginatedList, context: any) {
+  merge(existing, incoming, context) {
     const { direction, field } = context?.args?.sort ?? context?.variables?.sort ?? {};
     const r = uniqBy([...(existing?.rows ?? []), ...(incoming?.rows ?? [])], '__ref');
     const rows =
@@ -263,8 +280,8 @@ export const mergePaginatedList: {
             r,
             (ref) => {
               const value = context.readField(field, ref);
-              if (dayjs(value).isValid()) {
-                return dayjs(value).unix();
+              if (dayjs(value as string).isValid()) {
+                return dayjs(value as string).unix();
               }
               return value;
             },
@@ -279,32 +296,26 @@ export const mergePaginatedList: {
   },
 };
 
-export const mergeInfiniteList: {
-  keyArgs: any;
-  merge: (existing: PaginatedList, incoming: PaginatedList, context: any) => ApolloState;
-} = {
+export const mergeInfiniteList: FieldPolicy = {
   // Don't cache separate results based on
   // any of this field's arguments.
-  keyArgs(args: any) {
+  keyArgs(args, context) {
     // in order infinite pagination works properly, we need to ignore pagination-arg
     // while getting key-args for caching
-    return getCacheKeyArgs(omit(args, ['pagination']));
+    return getCacheKeyArgs(omit(args, ['pagination']), context);
   },
   // Concatenate the incoming list items with
   // the existing list items.
   merge: mergePaginatedList.merge,
 };
 
-export const mergeList: {
-  keyArgs: any;
-  merge: (existing: DataRow[], incoming: DataRow[], context: any) => ApolloState;
-} = {
+export const mergeList: FieldPolicy = {
   // Don't cache separate results based on
   // any of this field's arguments.
   keyArgs: getCacheKeyArgs,
   // Concatenate the incoming list items with
   // the existing list items.
-  merge(existing: DataRow[], incoming: DataRow[], context: any) {
+  merge(existing, incoming, context) {
     const { direction, field } = context?.args?.sort ?? context?.variables?.sort ?? {};
     const r = uniqBy([...(existing ?? []), ...(incoming ?? [])], '__ref');
     const rows =
@@ -313,8 +324,8 @@ export const mergeList: {
             r,
             (ref) => {
               const value = context.readField(field, ref);
-              if (dayjs(value).isValid()) {
-                return dayjs(value).unix();
+              if (dayjs(value as string).isValid()) {
+                return dayjs(value as string).unix();
               }
               return value;
             },
