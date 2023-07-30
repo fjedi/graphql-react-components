@@ -43,6 +43,7 @@ export {
   MutationHookOptions,
   BaseMutationOptions,
   MutationResult,
+  FetchResult,
   QueryHookOptions,
   QueryResult,
   LazyQueryHookOptions,
