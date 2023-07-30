@@ -170,7 +170,6 @@ export function updateAfterMutation(
     const { data } = result;
     const createdRow = get(data, `create${dataType}`) as DataRow | DataRow[];
     const removedRow = get(data, `remove${dataType}`) as DataRow | DataRow[];
-    //
     const mutationResult = createdRow || removedRow;
     if (!mutationResult) {
       return;
@@ -182,43 +181,38 @@ export function updateAfterMutation(
       if (!cacheId) {
         return;
       }
-      //
       const field = listFieldName || getListKeyFromDataType(dataType);
       cache.modify({
         fields: {
           [field](cachedData, { toReference }) {
             if (createdRow) {
               if (Array.isArray(cachedData)) {
-                // eslint-disable-next-line no-underscore-dangle
                 if (cachedData.some((r) => cacheId === r.__ref)) {
                   return cachedData;
                 }
                 return [toReference(cacheId)].concat(cachedData);
               }
-              //
-              const { rows, count } = cachedData;
-              // eslint-disable-next-line no-underscore-dangle
-              if (rows.some((r: CachedObjectRef) => cacheId === r.__ref)) {
+              const { rows, count } = cachedData as { rows: CachedObjectRef[]; count: number };
+              if (rows.some((r) => cacheId === r.__ref)) {
                 return cachedData;
               }
               return {
+                ...cachedData,
                 count: count + 1,
                 rows: [toReference(cacheId)].concat(rows),
               };
             }
             if (removedRow) {
               if (Array.isArray(cachedData)) {
-                // eslint-disable-next-line no-underscore-dangle
                 return cachedData.filter((r) => cacheId !== r.__ref);
               }
-              const { rows, count } = cachedData;
+              const { rows, count } = cachedData as { rows: CachedObjectRef[]; count: number };
               return {
+                ...cachedData,
                 count: count - 1,
-                // eslint-disable-next-line no-underscore-dangle
-                rows: rows.filter((r: CachedObjectRef) => cacheId !== r.__ref),
+                rows: rows.filter((r) => cacheId !== r.__ref),
               };
             }
-            //
             return cachedData;
           },
         },

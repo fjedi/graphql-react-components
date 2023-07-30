@@ -43,6 +43,7 @@ module.exports = {
     'no-debugger': 'off',
     'no-console': 1,
     'no-unused-vars': 0,
+    'no-underscore-dangle': 0,
     'max-len': [1, 150],
     'arrow-parens': 'off', // Несовместимо с prettier
     'no-mixed-operators': 'off', // Несовместимо с prettier
