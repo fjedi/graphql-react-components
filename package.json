@@ -54,7 +54,7 @@
     "apollo-upload-client": "17.0.0",
     "core-js": "3.25.0",
     "crypto-hash": "2.0.1",
-    "graphql": "16.6.0",
+    "graphql": "16.8.1",
     "graphql-ws": "5.10.1"
   },
   "devDependencies": {
