@@ -71,7 +71,7 @@
     "babel-core": "6.26.3",
     "babel-runtime": "6.26.0",
     "dayjs": "1.11.5",
-    "eslint": "8.22.0",
+    "eslint": "8.57.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-config-airbnb-typescript": "17.0.0",
     "eslint-config-prettier": "8.5.0",
