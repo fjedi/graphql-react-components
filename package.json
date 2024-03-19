@@ -67,7 +67,7 @@
     "@types/react": "18.0.18",
     "@typescript-eslint/eslint-plugin": "5.36.2",
     "@typescript-eslint/parser": "5.36.2",
-    "antd": "4.23.0",
+    "antd": "4.24.16",
     "babel-core": "6.26.3",
     "babel-runtime": "6.26.0",
     "dayjs": "1.11.5",
