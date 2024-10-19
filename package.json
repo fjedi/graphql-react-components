@@ -62,7 +62,7 @@
     "@rollup/plugin-node-resolve": "14.0.0",
     "@rollup/plugin-replace": "4.0.0",
     "@types/jest": "29.0.0",
-    "@types/lodash": "4.14.184",
+    "@types/lodash": "4.17.12",
     "@types/node": "18.7.15",
     "@types/react": "18.0.18",
     "@typescript-eslint/eslint-plugin": "5.36.2",
